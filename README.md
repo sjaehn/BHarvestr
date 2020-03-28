@@ -1,18 +1,17 @@
-# B.Jumblr
-Repository: BJumblr
+# B.Harvestr
+Repository: BHarvestr
 
-Description: B.Jumblr is a pattern-controlled audio stream / sample re-sequencer LV2 plugin.
+Description: B.Harvestr is an **experimental** granular synthesizer LV2 plugin.
 
-![screenshot](https://raw.githubusercontent.com/sjaehn/BJumblr/master/doc/screenshot.png "Screenshot from B.Jumblr")
+**Warning: B.Harvestr is in an early stage of development. Not for pruducion use! It is not
+stable yet. Some essential features including saving and restoring the plugin state are not
+(fully) implemented yet. Major changes in the plugin definition need to be expected. Therefore,
+future versions of this plugin may be completely incompatible to this version.**
 
 
 ## Installation
 
-a) Install the bjumblr package for your system
-* [Arch user repository](https://aur.archlinux.org/packages/bjumblr.lv2-git) by Milk Brewster
-* Check https://repology.org/project/bjumblr/versions for other systems
-
-b) Build your own binaries in the following three steps.
+Build your own binaries in the following three steps.
 
 Step 1: Clone or download this repository.
 
@@ -36,63 +35,29 @@ sudo make install PREFIX=/usr/local
 
 ## Running
 
-After the installation Carla, Ardour and any other LV2 host should automatically detect B.Jumblr.
+After the installation Carla, Ardour and any other LV2 host should automatically detect B.Harvestr.
 
 If jalv is installed, you can also call it
 ```
-jalv.gtk https://www.jahnichen.de/plugins/lv2/BJumblr
+jalv.gtk https://www.jahnichen.de/plugins/lv2/BHarvestr
 ```
 to run it stand-alone and connect it to the JACK system.
-
-**Jack transport is required to get information about beat and bar position (not required for seconds mode)**
 
 
 ## Usage
 
-From the technical POV B.Jumblr is a sequencer pattern-controlled audio delay effect.
+## TODO
 
-The pattern defines at when (horizontal) and which (vertical) piece of the audio input stream is
-sent to the audio output. Use the default diagonal line pattern for live playback. Moving a pad
-one step to the right results in a one step delayed playback of the respective piece of the audio
-input stream. Each pad (and thus each piece) can be levelled up or down by mouse wheel scrolling.
-
-### Source
-Select between (live) audio stream or a sample file as source.
-
-### Pattern matrix
-
-* **Left click**: Set (or delete) pad level
-* **Right click**: Pick pad level
-* **Scroll**: Increase or decrease pad value
-* **Shift scroll**: Resize waveform
-
-### Step sync
-
-B.Jumblr time line automatically synchronizes with the host time/position. Use the button - and +
-to manually shift the time line to the left or the right, respectively. The button < sets the time
-line to the start of the pattern. The home button can be used to re-synchronize with the host.
-
-### Column (step) edit mode
-
-There are two edit modes. The **ADD** mode allows to place additional pads to a step (or to remove
-them). So you can also set more then one pad per row to produce echo effects or make a canon.
-
-In contrast, there is only (exactly) one pad per step allowed in the **REPLACE** mode. Clicking or
-dragging will result in a replacement of the original pad. Note: Deletion of pads (cut) in the
-REPLACE mode results in their replacement by default pads.
-
-### Step size
-
-Defines the duration of each step. You can select between 1/16 and 4 seconds or beats or bars.
-Alternatively, you can enter any value between 0.01 and 4.0 in a host provided generic GUI.
-Note: Jack transport is required in the beats mode and in the bars mode.
-
-### Pattern size
-
-Defines the total pattern size (= number of steps, = number of rows). You can choose between
-predefined pattern sizes from 2 to 32 steps. Alternatively, you can enter any value between 2 and 32
-in a host provided generic GUI.  
+* Save / restore plugin state features: user pattern, user shapes
+* Extend MIDI support / features
+* Pitch detection
+* Add process features (filters, reverb, ...)
+* Use two dials to control pitch (st and ct)
+* Adjust output level to nr of grains
+* Reduce CPU load !!!
+* Move notification handler to worker process
+* Write documentation
+* Create presets
 
 
 ## Links
-* Preview video: https://www.youtube.com/watch?v=n3LrpOD8MrI

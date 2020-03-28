@@ -2,12 +2,12 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix ui:   <http://lv2plug.in/ns/extensions/ui#>.
 
-<https://www.jahnichen.de/plugins/lv2/BJumblr>
+<https://www.jahnichen.de/plugins/lv2/BHarvestr>
         a lv2:Plugin ;
-        lv2:binary <BJumblr.so> ;
-        rdfs:seeAlso <BJumblr.ttl> .
+        lv2:binary <BHarvestr.so> ;
+        rdfs:seeAlso <BHarvestr.ttl> .
 
-<https://www.jahnichen.de/plugins/lv2/BJumblr#gui>
+<https://www.jahnichen.de/plugins/lv2/BHarvestr#gui>
         a ui:X11UI;
-	ui:binary <BJumblr_GUI.so>;
-	rdfs:seeAlso <BJumblr.ttl> .
+	ui:binary <BHarvestr_GUI.so>;
+	rdfs:seeAlso <BHarvestr.ttl> .

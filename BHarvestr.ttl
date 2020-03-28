@@ -1,0 +1,2075 @@
+@prefix atom: <http://lv2plug.in/ns/ext/atom#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix time: <http://lv2plug.in/ns/ext/time#> .
+@prefix midi: <http://lv2plug.in/ns/ext/midi#> .
+@prefix urid: <http://lv2plug.in/ns/ext/urid#> .
+@prefix state: <http://lv2plug.in/ns/ext/state#> .
+@prefix work:  <http://lv2plug.in/ns/ext/worker#> .
+@prefix patch: <http://lv2plug.in/ns/ext/patch#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+@prefix ui: <http://lv2plug.in/ns/extensions/ui#> .
+@prefix rsz: <http://lv2plug.in/ns/ext/resize-port#> .
+
+<http://www.jahnichen.de/sjaehn#me>
+	a foaf:Person;
+	foaf:name "Sven Jaehnichen";
+#	foaf:mbox ;
+	foaf:homepage <https://github.com/sjaehn/> .
+
+<https://www.jahnichen.de/plugins/lv2/BHarvestr#samplePath>
+	  a lv2:Parameter ;
+	  rdfs:label "Sample File" ;
+	  rdfs:range atom:Path .
+
+<https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoName>
+  	  a lv2:Parameter ;
+  	  rdfs:label "Patch name" ;
+  	  rdfs:range atom:String .
+
+<https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoType>
+  	  a lv2:Parameter ;
+  	  rdfs:label "Patch type" ;
+  	  rdfs:range atom:String .
+
+<https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoDate>
+  	  a lv2:Parameter ;
+  	  rdfs:label "Patch date" ;
+  	  rdfs:range atom:Int .
+
+<https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoCreator>
+  	  a lv2:Parameter ;
+  	  rdfs:label "Patch creator" ;
+  	  rdfs:range atom:String .
+
+<https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoURI>
+  	  a lv2:Parameter ;
+  	  rdfs:label "Patch URL" ;
+  	  rdfs:range atom:String .
+
+<https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoLicense>
+  	  a lv2:Parameter ;
+  	  rdfs:label "Patch licence" ;
+  	  rdfs:range atom:String .
+
+<https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoDescription>
+  	  a lv2:Parameter ;
+  	  rdfs:label "Patch description" ;
+  	  rdfs:range atom:String .
+
+<https://www.jahnichen.de/plugins/lv2/BHarvestr#gui>
+	a ui:X11UI;
+	lv2:extensionData ui:idleInterface ;
+	lv2:requiredFeature ui:idleInterface .
+
+<https://www.jahnichen.de/plugins/lv2/BHarvestr>
+        a lv2:Plugin , lv2:OscillatorPlugin, doap:Project ;
+        rdfs:comment "Granular synthesizer" ;
+	doap:name "B.Harvestr" ;
+	doap:license <http://usefulinc.com/doap/licenses/gpl>;
+#	lv2:microVersion 0 ;
+#	lv2:minorVersion 0 ;
+        doap:maintainer <http://www.jahnichen.de/sjaehn#me> ;
+        lv2:optionalFeature lv2:hardRTCapable , state:loadDefaultState ;
+        lv2:extensionData state:interface , work:interface ;
+	lv2:requiredFeature urid:map , work:schedule ;
+	ui:ui <https://www.jahnichen.de/plugins/lv2/BHarvestr#gui> ;
+
+	patch:writable <https://www.jahnichen.de/plugins/lv2/BHarvestr#samplePath> ;
+	patch:writable <https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoName> ;
+	patch:writable <https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoType> ;
+	patch:writable <https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoDate> ;
+	patch:writable <https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoCreator> ;
+	patch:writable <https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoURI> ;
+	patch:writable <https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoLicense> ;
+	patch:writable <https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoDescription> ;
+
+	lv2:port [
+		a lv2:InputPort , atom:AtomPort ;
+		atom:bufferType atom:Sequence ;
+		atom:supports midi:MidiEvent ;
+		atom:supports patch:Message ;
+		lv2:index 0 ;
+		lv2:symbol "control" ;
+		lv2:name "Control" ;
+		rsz:minimumSize 65535;
+	] , [
+		a lv2:OutputPort , atom:AtomPort ;
+		atom:bufferType atom:Sequence ;
+		atom:supports patch:Message ;
+		lv2:index 1 ;
+		lv2:symbol "notify" ;
+		lv2:name "Notify" ;
+		rsz:minimumSize 65535;
+	] , [
+		a lv2:AudioPort , lv2:OutputPort ;
+		lv2:index 2 ;
+		lv2:symbol "lv2_audio_out_1" ;
+		lv2:name "Audio Output 1" ;
+	] , [
+		a lv2:AudioPort , lv2:OutputPort ;
+		lv2:index 3 ;
+		lv2:symbol "lv2_audio_out_2" ;
+		lv2:name "Audio Output 2" ;
+	] , [
+                a lv2:InputPort , lv2:ControlPort ;
+                lv2:index 4 ;
+                lv2:symbol "max_voices" ;
+                lv2:name "Max. voices" ;
+                lv2:portProperty lv2:integer ;
+                lv2:default 4 ;
+                lv2:minimum 1 ;
+                lv2:maximum 16 ;
+        ] , [
+                a lv2:InputPort , lv2:ControlPort ;
+                lv2:index 5 ;
+                lv2:symbol "max_grains" ;
+                lv2:name "Max. grains per voice" ;
+                lv2:portProperty lv2:integer ;
+                lv2:default 15 ;
+                lv2:minimum 1 ;
+                lv2:maximum 63 ;
+        ] , [
+                a lv2:InputPort , lv2:ControlPort ;
+                lv2:index 6 ;
+                lv2:symbol "sample_start" ;
+                lv2:name "Sample start" ;
+                lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+                lv2:maximum 1.0 ;
+        ] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 7 ;
+		lv2:symbol "sample_end" ;
+		lv2:name "Sample end" ;
+                lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+                lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 8 ;
+		lv2:symbol "sample_freq" ;
+		lv2:name "Sample frequency" ;
+		lv2:default 440.0 ;
+		lv2:minimum 10.0 ;
+		lv2:maximum 20000.0 ;
+		units:unit units:hz;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 9 ;
+		lv2:symbol "pattern_size" ;
+		lv2:name "Relative pattern size" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.01 ;
+		lv2:maximum 8.0 ;
+	] , [
+                a lv2:InputPort , lv2:ControlPort ;
+                lv2:index 10 ;
+                lv2:symbol "pattern_type" ;
+                lv2:name "Motion pattern type" ;
+                lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "Forward playback"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Reverse playback"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Sine swinging playback"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Ping pong playback"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "User pattern"; rdf:value 4 ] ;
+                lv2:default 2 ;
+                lv2:minimum 0 ;
+                lv2:maximum 4 ;
+        ] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 11 ;
+		lv2:symbol "grain_size_value_start" ;
+		lv2:name "Minimal grain size" ;
+		lv2:default 50.0 ;
+		lv2:minimum 1.0 ;
+		lv2:maximum 1000.0 ;
+		units:unit units:ms;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 12 ;
+		lv2:symbol "grain_size_value_end" ;
+		lv2:name "Maximal grain size" ;
+		lv2:default 50.0 ;
+		lv2:minimum 1.0 ;
+		lv2:maximum 1000.0 ;
+		units:unit units:ms;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 13 ;
+		lv2:symbol "grain_size_modulator_1" ;
+		lv2:name "Grain size modulator 1" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 14 ;
+		lv2:symbol "grain_size_modulator_2" ;
+		lv2:name "Grain size modulator 2" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 15 ;
+		lv2:symbol "grain_size_modulator_3" ;
+		lv2:name "Grain size modulator 3" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 16 ;
+		lv2:symbol "grain_size_modulator_4" ;
+		lv2:name "Grain size modulator 4" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 17 ;
+		lv2:symbol "grain_rate_value_start" ;
+		lv2:name "Minimal grain rate" ;
+		lv2:default 2.0 ;
+		lv2:minimum 0.1 ;
+		lv2:maximum 100.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 18 ;
+		lv2:symbol "grain_rate_value_end" ;
+		lv2:name "Maximal grain rate" ;
+		lv2:default 2.0 ;
+		lv2:minimum 0.1 ;
+		lv2:maximum 100.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 19 ;
+		lv2:symbol "grain_rate_modulator_1" ;
+		lv2:name "Grain rate modulator 1" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 20 ;
+		lv2:symbol "grain_rate_modulator_2" ;
+		lv2:name "Grain rate modulator 2" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 21 ;
+		lv2:symbol "grain_rate_modulator_3" ;
+		lv2:name "Grain rate modulator 3" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 22 ;
+		lv2:symbol "grain_rate_modulator_4" ;
+		lv2:name "Grain rate modulator 4" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 23 ;
+		lv2:symbol "grain_phase_value_start" ;
+		lv2:name "Minimal grain phase shift" ;
+		lv2:default 0.0 ;
+		lv2:minimum -1.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 24 ;
+		lv2:symbol "grain_phase_value_end" ;
+		lv2:name "Maximal grain phase shift" ;
+		lv2:default 0.0 ;
+		lv2:minimum -1.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 25 ;
+		lv2:symbol "grain_phase_modulator_1" ;
+		lv2:name "Grain phase modulator 1" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 26 ;
+		lv2:symbol "grain_phase_modulator_2" ;
+		lv2:name "Grain phase modulator 2" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 27 ;
+		lv2:symbol "grain_phase_modulator_3" ;
+		lv2:name "Grain phase modulator 3" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 28 ;
+		lv2:symbol "grain_phase_modulator_4" ;
+		lv2:name "Grain phase modulator 4" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 29 ;
+		lv2:symbol "grain_drive_value_start" ;
+		lv2:name "Minimal grain drive" ;
+		lv2:default 1.0 ;
+		lv2:minimum -1.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 30 ;
+		lv2:symbol "grain_drive_value_end" ;
+		lv2:name "Maximal grain drive" ;
+		lv2:default 1.0 ;
+		lv2:minimum -1.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 31 ;
+		lv2:symbol "grain_drive_modulator_1" ;
+		lv2:name "Grain drive modulator 1" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 32 ;
+		lv2:symbol "grain_drive_modulator_2" ;
+		lv2:name "Grain drive modulator 2" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 33 ;
+		lv2:symbol "grain_drive_modulator_3" ;
+		lv2:name "Grain drive modulator 3" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 34 ;
+		lv2:symbol "grain_drive_modulator_4" ;
+		lv2:name "Grain drive modulator 4" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 35 ;
+		lv2:symbol "grain_level_value_start" ;
+		lv2:name "Minimal grain level" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 2.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 36 ;
+		lv2:symbol "grain_level_value_end" ;
+		lv2:name "Maximal grain level" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 2.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 37 ;
+		lv2:symbol "grain_level_modulator_1" ;
+		lv2:name "Grain level modulator 1" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 38 ;
+		lv2:symbol "grain_level_modulator_2" ;
+		lv2:name "Grain level modulator 2" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 39 ;
+		lv2:symbol "grain_level_modulator_3" ;
+		lv2:name "Grain level modulator 3" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 40 ;
+		lv2:symbol "grain_level_modulator_4" ;
+		lv2:name "Grain level modulator 4" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 41 ;
+		lv2:symbol "grain_pan_value_start" ;
+		lv2:name "Minimal grain pan" ;
+		lv2:default 0.0 ;
+		lv2:minimum -1.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 42 ;
+		lv2:symbol "grain_pan_value_end" ;
+		lv2:name "Maximal grain pan" ;
+		lv2:default 0.0 ;
+		lv2:minimum -1.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 43 ;
+		lv2:symbol "grain_pan_modulator_1" ;
+		lv2:name "Grain pan modulator 1" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 44 ;
+		lv2:symbol "grain_pan_modulator_2" ;
+		lv2:name "Grain pan modulator 2" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 45 ;
+		lv2:symbol "grain_pan_modulator_3" ;
+		lv2:name "Grain pan modulator 3" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 46 ;
+		lv2:symbol "grain_pan_modulator_4" ;
+		lv2:name "Grain pan modulator 4" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 47 ;
+		lv2:symbol "grain_pitch_value_start" ;
+		lv2:name "Minimal grain pitch" ;
+		lv2:default 0.0 ;
+		lv2:minimum -12.0 ;
+		lv2:maximum 12.0 ;
+		units:unit units:semitone12TET;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 48 ;
+		lv2:symbol "grain_pitch_value_end" ;
+		lv2:name "Maximal grain pitch" ;
+		lv2:default 0.0 ;
+		lv2:minimum -12.0 ;
+		lv2:maximum 12.0 ;
+		units:unit units:semitone12TET;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 49 ;
+		lv2:symbol "grain_pitch_modulator_1" ;
+		lv2:name "Grain pitch modulator 1" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 50 ;
+		lv2:symbol "grain_pitch_modulator_2" ;
+		lv2:name "Grain pitch modulator 2" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 51 ;
+		lv2:symbol "grain_pitch_modulator_3" ;
+		lv2:name "Grain pitch modulator 3" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 52 ;
+		lv2:symbol "grain_pitch_modulator_4" ;
+		lv2:name "Grain pitch modulator 4" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random 1"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 53 ;
+		lv2:symbol "grain_shape" ;
+		lv2:name "Grain shape type" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "Sine"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Half sine"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Triangle"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Trapez"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "User 1"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "User 2"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "User 3"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "User 4"; rdf:value 7 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 7 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 54 ;
+		lv2:symbol "lfo_1_type" ;
+		lv2:name "LFO 1 type" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "Sine"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Triangle"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Triangle (2 bits)"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Triangle (3 bits)"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Triangle (4 bits)"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "Sawtooth"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "Sawtooth (2 bits)"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "Sawtooth (3 bits)"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "Sawtooth (4 bits)"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Reverse sawtooth"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Reverse sawtooth (2 bits)"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Reverse sawtooth (3 bits)"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Reverse sawtooth (4 bits)"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Square"; rdf:value 13 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 13 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 55 ;
+		lv2:symbol "lfo_1_freq" ;
+		lv2:name "LFO 1 frequency" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.1 ;
+		lv2:maximum 10.0 ;
+		units:unit units:hz;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 56 ;
+		lv2:symbol "lfo_1_phase" ;
+		lv2:name "LFO 1 phase shift" ;
+		lv2:default 0.0 ;
+		lv2:minimum -1.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 57 ;
+		lv2:symbol "lfo_1_amp" ;
+		lv2:name "LFO 1 amplitude" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 58 ;
+		lv2:symbol "lfo_2_type" ;
+		lv2:name "LFO 2 type" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "Sine"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Triangle"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Triangle (2 bits)"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Triangle (3 bits)"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Triangle (4 bits)"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "Sawtooth"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "Sawtooth (2 bits)"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "Sawtooth (3 bits)"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "Sawtooth (4 bits)"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Reverse sawtooth"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Reverse sawtooth (2 bits)"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Reverse sawtooth (3 bits)"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Reverse sawtooth (4 bits)"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Square"; rdf:value 13 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 13 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 59 ;
+		lv2:symbol "lfo_2_freq" ;
+		lv2:name "LFO 2 frequency" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.1 ;
+		lv2:maximum 10.0 ;
+		units:unit units:hz;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 60 ;
+		lv2:symbol "lfo_2_phase" ;
+		lv2:name "LFO 2 phase shift" ;
+		lv2:default 0.0 ;
+		lv2:minimum -1.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 61 ;
+		lv2:symbol "lfo_2_amp" ;
+		lv2:name "LFO 2 amplitude" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 62 ;
+		lv2:symbol "lfo_3_type" ;
+		lv2:name "LFO 3 type" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "Sine"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Triangle"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Triangle (2 bits)"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Triangle (3 bits)"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Triangle (4 bits)"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "Sawtooth"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "Sawtooth (2 bits)"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "Sawtooth (3 bits)"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "Sawtooth (4 bits)"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Reverse sawtooth"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Reverse sawtooth (2 bits)"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Reverse sawtooth (3 bits)"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Reverse sawtooth (4 bits)"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Square"; rdf:value 13 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 13 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 63 ;
+		lv2:symbol "lfo_3_freq" ;
+		lv2:name "LFO 3 frequency" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.1 ;
+		lv2:maximum 10.0 ;
+		units:unit units:hz;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 64 ;
+		lv2:symbol "lfo_3_phase" ;
+		lv2:name "LFO 3 phase shift" ;
+		lv2:default 0.0 ;
+		lv2:minimum -1.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 65 ;
+		lv2:symbol "lfo_3_amp" ;
+		lv2:name "LFO 3 amplitude" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 66 ;
+		lv2:symbol "lfo_4_type" ;
+		lv2:name "LFO 4 type" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "Sine"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Triangle"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Triangle (2 bits)"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Triangle (3 bits)"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Triangle (4 bits)"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "Sawtooth"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "Sawtooth (2 bits)"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "Sawtooth (3 bits)"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "Sawtooth (4 bits)"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Reverse sawtooth"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Reverse sawtooth (2 bits)"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Reverse sawtooth (3 bits)"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Reverse sawtooth (4 bits)"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Square"; rdf:value 13 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 13 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 67 ;
+		lv2:symbol "lfo_4_freq" ;
+		lv2:name "LFO 4 frequency" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.1 ;
+		lv2:maximum 10.0 ;
+		units:unit units:hz;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 68 ;
+		lv2:symbol "lfo_4_phase" ;
+		lv2:name "LFO 4 phase shift" ;
+		lv2:default 0.0 ;
+		lv2:minimum -1.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 69 ;
+		lv2:symbol "lfo_4_amp" ;
+		lv2:name "LFO 4 amplitude" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 70 ;
+		lv2:symbol "seq_1_type" ;
+		lv2:name "Sequencer 1 size" ;
+		lv2:default 8 ;
+		lv2:minimum 1 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 71 ;
+		lv2:symbol "seq_1_freq" ;
+		lv2:name "Sequencer 1 frequency" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.1 ;
+		lv2:maximum 10.0 ;
+		units:unit units:hz;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 72 ;
+		lv2:symbol "seq_1_phase" ;
+		lv2:name "Sequencer 1 phase shift" ;
+		lv2:default 0.0 ;
+		lv2:minimum -1.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 73 ;
+		lv2:symbol "seq_1_step_1" ;
+		lv2:name "Sequencer 1 step 1" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 74 ;
+		lv2:symbol "seq_1_step_2" ;
+		lv2:name "Sequencer 1 step 2" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 75 ;
+		lv2:symbol "seq_1_step_3" ;
+		lv2:name "Sequencer 1 step 3" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 76 ;
+		lv2:symbol "seq_1_step_4" ;
+		lv2:name "Sequencer 1 step 4" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 77 ;
+		lv2:symbol "seq_1_step_5" ;
+		lv2:name "Sequencer 1 step 5" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 78 ;
+		lv2:symbol "seq_1_step_6" ;
+		lv2:name "Sequencer 1 step 6" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 79 ;
+		lv2:symbol "seq_1_step_7" ;
+		lv2:name "Sequencer 1 step 7" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 80 ;
+		lv2:symbol "seq_1_step_8" ;
+		lv2:name "Sequencer 1 step 8" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 81 ;
+		lv2:symbol "seq_1_step_9" ;
+		lv2:name "Sequencer 1 step 9" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 82 ;
+		lv2:symbol "seq_1_step_10" ;
+		lv2:name "Sequencer 1 step 10" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 83 ;
+		lv2:symbol "seq_1_step_11" ;
+		lv2:name "Sequencer 1 step 11" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 84 ;
+		lv2:symbol "seq_1_step_12" ;
+		lv2:name "Sequencer 1 step 12" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 85 ;
+		lv2:symbol "seq_1_step_13" ;
+		lv2:name "Sequencer 1 step 13" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 86 ;
+		lv2:symbol "seq_1_step_14" ;
+		lv2:name "Sequencer 1 step 14" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 87 ;
+		lv2:symbol "seq_1_step_15" ;
+		lv2:name "Sequencer 1 step 15" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 88 ;
+		lv2:symbol "seq_1_step_16" ;
+		lv2:name "Sequencer 1 step 16" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 89 ;
+		lv2:symbol "seq_2_type" ;
+		lv2:name "Sequencer 2 size" ;
+		lv2:default 8 ;
+		lv2:minimum 1 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 90 ;
+		lv2:symbol "seq_2_freq" ;
+		lv2:name "Sequencer 2 frequency" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.1 ;
+		lv2:maximum 10.0 ;
+		units:unit units:hz;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 91 ;
+		lv2:symbol "seq_2_phase" ;
+		lv2:name "Sequencer 2 phase shift" ;
+		lv2:default 0.0 ;
+		lv2:minimum -1.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 92 ;
+		lv2:symbol "seq_2_step_1" ;
+		lv2:name "Sequencer 2 step 1" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 93 ;
+		lv2:symbol "seq_2_step_2" ;
+		lv2:name "Sequencer 2 step 2" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 94 ;
+		lv2:symbol "seq_2_step_3" ;
+		lv2:name "Sequencer 2 step 3" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 95 ;
+		lv2:symbol "seq_2_step_4" ;
+		lv2:name "Sequencer 2 step 4" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 96 ;
+		lv2:symbol "seq_2_step_5" ;
+		lv2:name "Sequencer 2 step 5" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 97 ;
+		lv2:symbol "seq_2_step_6" ;
+		lv2:name "Sequencer 2 step 6" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 98 ;
+		lv2:symbol "seq_2_step_7" ;
+		lv2:name "Sequencer 2 step 7" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 99 ;
+		lv2:symbol "seq_2_step_8" ;
+		lv2:name "Sequencer 2 step 8" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 100 ;
+		lv2:symbol "seq_2_step_9" ;
+		lv2:name "Sequencer 2 step 9" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 101 ;
+		lv2:symbol "seq_2_step_10" ;
+		lv2:name "Sequencer 2 step 10" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 102 ;
+		lv2:symbol "seq_2_step_11" ;
+		lv2:name "Sequencer 2 step 11" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 103 ;
+		lv2:symbol "seq_2_step_12" ;
+		lv2:name "Sequencer 2 step 12" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 104 ;
+		lv2:symbol "seq_2_step_13" ;
+		lv2:name "Sequencer 2 step 13" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 105 ;
+		lv2:symbol "seq_2_step_14" ;
+		lv2:name "Sequencer 2 step 14" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 106 ;
+		lv2:symbol "seq_2_step_15" ;
+		lv2:name "Sequencer 2 step 15" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 107 ;
+		lv2:symbol "seq_2_step_16" ;
+		lv2:name "Sequencer 2 step 16" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 108 ;
+		lv2:symbol "seq_3_type" ;
+		lv2:name "Sequencer 3 size" ;
+		lv2:default 8 ;
+		lv2:minimum 1 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 109 ;
+		lv2:symbol "seq_3_freq" ;
+		lv2:name "Sequencer 3 frequency" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.1 ;
+		lv2:maximum 10.0 ;
+		units:unit units:hz;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 110 ;
+		lv2:symbol "seq_3_phase" ;
+		lv2:name "Sequencer 3 phase shift" ;
+		lv2:default 0.0 ;
+		lv2:minimum -1.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 111 ;
+		lv2:symbol "seq_3_step_1" ;
+		lv2:name "Sequencer 3 step 1" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 112 ;
+		lv2:symbol "seq_3_step_2" ;
+		lv2:name "Sequencer 3 step 2" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 113 ;
+		lv2:symbol "seq_3_step_3" ;
+		lv2:name "Sequencer 3 step 3" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 114 ;
+		lv2:symbol "seq_3_step_4" ;
+		lv2:name "Sequencer 3 step 4" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 115 ;
+		lv2:symbol "seq_3_step_5" ;
+		lv2:name "Sequencer 3 step 5" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 116 ;
+		lv2:symbol "seq_3_step_6" ;
+		lv2:name "Sequencer 3 step 6" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 117 ;
+		lv2:symbol "seq_3_step_7" ;
+		lv2:name "Sequencer 3 step 7" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 118 ;
+		lv2:symbol "seq_3_step_8" ;
+		lv2:name "Sequencer 3 step 8" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 119 ;
+		lv2:symbol "seq_3_step_9" ;
+		lv2:name "Sequencer 3 step 9" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 120 ;
+		lv2:symbol "seq_3_step_10" ;
+		lv2:name "Sequencer 3 step 10" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 121 ;
+		lv2:symbol "seq_3_step_11" ;
+		lv2:name "Sequencer 3 step 11" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 122 ;
+		lv2:symbol "seq_3_step_12" ;
+		lv2:name "Sequencer 3 step 12" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 123 ;
+		lv2:symbol "seq_3_step_13" ;
+		lv2:name "Sequencer 3 step 13" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 124 ;
+		lv2:symbol "seq_3_step_14" ;
+		lv2:name "Sequencer 3 step 14" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 125 ;
+		lv2:symbol "seq_3_step_15" ;
+		lv2:name "Sequencer 3 step 15" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 126 ;
+		lv2:symbol "seq_3_step_16" ;
+		lv2:name "Sequencer 3 step 16" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 127 ;
+		lv2:symbol "seq_4_type" ;
+		lv2:name "Sequencer 4 size" ;
+		lv2:default 8 ;
+		lv2:minimum 1 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 128 ;
+		lv2:symbol "seq_4_freq" ;
+		lv2:name "Sequencer 4 frequency" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.1 ;
+		lv2:maximum 10.0 ;
+		units:unit units:hz;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 129 ;
+		lv2:symbol "seq_4_phase" ;
+		lv2:name "Sequencer 4 phase shift" ;
+		lv2:default 0.0 ;
+		lv2:minimum -1.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 130 ;
+		lv2:symbol "seq_4_step_1" ;
+		lv2:name "Sequencer 4 step 1" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 131 ;
+		lv2:symbol "seq_4_step_2" ;
+		lv2:name "Sequencer 4 step 2" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 132 ;
+		lv2:symbol "seq_4_step_3" ;
+		lv2:name "Sequencer 4 step 3" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 133 ;
+		lv2:symbol "seq_4_step_4" ;
+		lv2:name "Sequencer 4 step 4" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 134 ;
+		lv2:symbol "seq_4_step_5" ;
+		lv2:name "Sequencer 4 step 5" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 135 ;
+		lv2:symbol "seq_4_step_6" ;
+		lv2:name "Sequencer 4 step 6" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 136 ;
+		lv2:symbol "seq_4_step_7" ;
+		lv2:name "Sequencer 4 step 7" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 137 ;
+		lv2:symbol "seq_4_step_8" ;
+		lv2:name "Sequencer 4 step 8" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 138 ;
+		lv2:symbol "seq_4_step_9" ;
+		lv2:name "Sequencer 4 step 9" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 139 ;
+		lv2:symbol "seq_4_step_10" ;
+		lv2:name "Sequencer 4 step 10" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 140 ;
+		lv2:symbol "seq_4_step_11" ;
+		lv2:name "Sequencer 4 step 11" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 141 ;
+		lv2:symbol "seq_4_step_12" ;
+		lv2:name "Sequencer 4 step 12" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 142 ;
+		lv2:symbol "seq_4_step_13" ;
+		lv2:name "Sequencer 4 step 13" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 143 ;
+		lv2:symbol "seq_4_step_14" ;
+		lv2:name "Sequencer 4 step 14" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 144 ;
+		lv2:symbol "seq_4_step_15" ;
+		lv2:name "Sequencer 4 step 15" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 145 ;
+		lv2:symbol "seq_4_step_16" ;
+		lv2:name "Sequencer 4 step 16" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 146 ;
+		lv2:symbol "rnd_1_min" ;
+		lv2:name "Random 1 min" ;
+		lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 147 ;
+		lv2:symbol "rnd_1_max" ;
+		lv2:name "Random 1 max" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 148 ;
+		lv2:symbol "rnd_2_min" ;
+		lv2:name "Random 2 min" ;
+		lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 149 ;
+		lv2:symbol "rnd_2_max" ;
+		lv2:name "Random 2 max" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 150 ;
+		lv2:symbol "rnd_3_min" ;
+		lv2:name "Random 3 min" ;
+		lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 151 ;
+		lv2:symbol "rnd_3_max" ;
+		lv2:name "Random 3 max" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 152 ;
+		lv2:symbol "rnd_4_min" ;
+		lv2:name "Random 4 min" ;
+		lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 153 ;
+		lv2:symbol "rnd_4_max" ;
+		lv2:name "Random 4 max" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 154 ;
+		lv2:symbol "env_1_attack" ;
+		lv2:name "Envelope 1 attack" ;
+		lv2:default 0.2 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 4.0 ;
+		units:unit units:s ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 155 ;
+		lv2:symbol "env_1_decay" ;
+		lv2:name "Envelope 1 decay" ;
+		lv2:default 0.2 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 4.0 ;
+		units:unit units:s ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 156 ;
+		lv2:symbol "env_1_sustain" ;
+		lv2:name "Envelope 1 sustain" ;
+		lv2:default 0.8 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 157 ;
+		lv2:symbol "env_1_release" ;
+		lv2:name "Envelope 1 release" ;
+		lv2:default 0.4 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 4.0 ;
+		units:unit units:s ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 158 ;
+		lv2:symbol "env_2_attack" ;
+		lv2:name "Envelope 2 attack" ;
+		lv2:default 0.2 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 4.0 ;
+		units:unit units:s ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 159 ;
+		lv2:symbol "env_2_decay" ;
+		lv2:name "Envelope 2 decay" ;
+		lv2:default 0.2 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 4.0 ;
+		units:unit units:s ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 160 ;
+		lv2:symbol "env_2_sustain" ;
+		lv2:name "Envelope 2 sustain" ;
+		lv2:default 0.8 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 161 ;
+		lv2:symbol "env_2_release" ;
+		lv2:name "Envelope 2 release" ;
+		lv2:default 0.4 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 4.0 ;
+		units:unit units:s ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 162 ;
+		lv2:symbol "env_3_attack" ;
+		lv2:name "Envelope 3 attack" ;
+		lv2:default 0.2 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 4.0 ;
+		units:unit units:s ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 163 ;
+		lv2:symbol "env_3_decay" ;
+		lv2:name "Envelope 3 decay" ;
+		lv2:default 0.2 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 4.0 ;
+		units:unit units:s ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 164 ;
+		lv2:symbol "env_3_sustain" ;
+		lv2:name "Envelope 3 sustain" ;
+		lv2:default 0.8 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 165 ;
+		lv2:symbol "env_3_release" ;
+		lv2:name "Envelope 3 release" ;
+		lv2:default 0.4 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 4.0 ;
+		units:unit units:s ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 166 ;
+		lv2:symbol "env_4_attack" ;
+		lv2:name "Envelope 1 attack" ;
+		lv2:default 0.2 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 4.0 ;
+		units:unit units:s ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 167 ;
+		lv2:symbol "env_4_decay" ;
+		lv2:name "Envelope 4 decay" ;
+		lv2:default 0.2 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 4.0 ;
+		units:unit units:s ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 168 ;
+		lv2:symbol "env_4_sustain" ;
+		lv2:name "Envelope 4 sustain" ;
+		lv2:default 0.8 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 169 ;
+		lv2:symbol "env_4_release" ;
+		lv2:name "Envelope 4 release" ;
+		lv2:default 0.4 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 4.0 ;
+		units:unit units:s ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 170 ;
+		lv2:symbol "synth_envelope" ;
+		lv2:name "Synth envelope" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 3 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 3 ;
+	] ;
+
+	state:state [
+                <https://www.jahnichen.de/plugins/lv2/BHarvestr#samplePath> <sine440.wav> ;
+		<https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoName> "Default" ;
+		<https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoType> "Pad" ;
+		<https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoDate> 44724 ;
+		<https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoCreator> "sjaehn";
+		<https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoURI> "https://www.jahnichen.de/plugins/lv2/BHarvestr";
+		<https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoLicense> "CC0";
+		<https://www.jahnichen.de/plugins/lv2/BHarvestr#presetInfoDescription> "Factory preset using a 440 Hz sine wave"
+        ] .

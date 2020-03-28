@@ -1,4 +1,4 @@
-/*  B.Jumblr
+/* B.Harvestr
  * LV2 Plugin
  *
  * Copyright (C) 2018, 2019 by Sven Jähnichen
@@ -21,10 +21,18 @@
 #ifndef DEFINITIONS_H_
 #define DEFINITIONS_H_
 
-#define MAXSTEPS 32
-#define WAVEFORMSIZE 1024
-#define BJUMBLR_URI "https://www.jahnichen.de/plugins/lv2/BJumblr"
-#define BJUMBLR_GUI_URI "https://www.jahnichen.de/plugins/lv2/BJumblr#gui"
+#define BHARVESTR_URI "https://www.jahnichen.de/plugins/lv2/BHarvestr"
+#define BHARVESTR_GUI_URI "https://www.jahnichen.de/plugins/lv2/BHarvestr#gui"
+
+#define MAXPATTERNSTEPS 1024
+#define DISPLAYDATASIZE 2048
+#define MAXSHAPENODES 16
+#define MAXVOICES 16
+#define MAXGRAINS 64
+#define MAXSHAPES 9
+#define MAXNODES 16
+#define MAXUNDO 20
+#define GRIDSIZE 2.0
 
 #ifndef LIMIT
 #define LIMIT(val, min, max) ((val) > (max) ? (max) : ((val) < (min) ? (min) : (val)))

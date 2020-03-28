@@ -28,11 +28,11 @@ GUIPPFLAGS += -DPUGL_HAVE_CAIRO
 DSPFLAGS += `$(PKG_CONFIG) --cflags --libs $(LV2_LIBS)`
 GUIFLAGS += `$(PKG_CONFIG) --cflags --libs $(GUI_LIBS)`
 
-BUNDLE = BJumblr.lv2
-DSP = BJumblr
-DSP_SRC = ./src/BJumblr.cpp
-GUI = BJumblr_GUI
-GUI_SRC = ./src/BJumblrGUI.cpp
+BUNDLE = BHarvestr.lv2
+DSP = BHarvestr
+DSP_SRC = ./src/BHarvestr.cpp
+GUI = BHarvestr_GUI
+GUI_SRC = ./src/BHarvestrGUI.cpp
 OBJ_EXT = .so
 DSP_OBJ = $(DSP)$(OBJ_EXT)
 GUI_OBJ = $(GUI)$(OBJ_EXT)
@@ -40,16 +40,41 @@ B_OBJECTS = $(addprefix $(BUNDLE)/, $(DSP_OBJ) $(GUI_OBJ))
 
 ROOTFILES = \
 	manifest.ttl \
-	BJumblr.ttl \
+	BHarvestr.ttl \
+	sine440.wav \
 	LICENSE
 
 INCFILES = \
-	inc/surface.png
+	inc/surface.png \
+	inc/Global_settings.png \
+	inc/Patch_settings.png \
+	inc/LFO1.png \
+	inc/LFO2.png \
+	inc/LFO3.png \
+	inc/LFO4.png \
+	inc/Seq1.png \
+	inc/Seq2.png \
+	inc/Seq3.png \
+	inc/Seq4.png \
+	inc/Rnd1.png \
+	inc/Rnd2.png \
+	inc/Rnd3.png \
+	inc/Rnd4.png \
+	inc/Env1.png \
+	inc/Env2.png \
+	inc/Env3.png \
+	inc/Env4.png
 
 B_FILES = $(addprefix $(BUNDLE)/, $(ROOTFILES) $(INCFILES))
 
 GUI_INCL = \
+	src/ValueSelect.cpp \
+	src/ShapeWidget.cpp \
 	src/BWidgets/FileChooser.cpp \
+	src/BWidgets/HPianoRoll.cpp \
+	src/BWidgets/PianoWidget.cpp \
+	src/BWidgets/ImageIcon.cpp \
+	src/BWidgets/Icon.cpp \
 	src/BWidgets/PopupListBox.cpp \
 	src/BWidgets/ListBox.cpp \
 	src/BWidgets/ChoiceBox.cpp \
@@ -57,11 +82,11 @@ GUI_INCL = \
 	src/BWidgets/Text.cpp \
 	src/BWidgets/UpButton.cpp \
 	src/BWidgets/DownButton.cpp \
-	src/BWidgets/LeftButton.cpp \
-	src/BWidgets/PlusButton.cpp \
-	src/BWidgets/MinusButton.cpp \
 	src/BWidgets/TextButton.cpp \
+	src/BWidgets/ToggleButton.cpp \
 	src/BWidgets/Button.cpp \
+	src/BWidgets/VScale.cpp \
+	src/BWidgets/HScale.cpp \
 	src/BWidgets/DrawingSurface.cpp \
 	src/BWidgets/DialValue.cpp \
 	src/BWidgets/Dial.cpp \

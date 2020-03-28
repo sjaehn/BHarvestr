@@ -1,5 +1,5 @@
-/* B.SEQuencer
- * MIDI Step Sequencer LV2 Plugin
+/* B.Harvestr
+ * LV2 Plugin
  *
  * Copyright (C) 2018, 2019 by Sven Jähnichen
  *

@@ -1,4 +1,4 @@
-/*  B.Jumblr
+/* B.Harvestr
  * LV2 Plugin
  *
  * Copyright (C) 2019 by Sven Jähnichen
