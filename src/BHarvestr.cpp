@@ -882,8 +882,9 @@ void BHarvestr::play (const int start, const int end)
 
 
 					// Set modulated grain properties
-					float grainpitch = modulateGrainProperty (&voice, GRAIN_PITCH, iframe);
-					grain.speed = noteToFrequency(float (voice.note) + grainpitch) / controllers[SAMPLE_FREQ];
+					float graintune = modulateGrainProperty (&voice, GRAIN_TUNE, iframe);
+					float grainfine = modulateGrainProperty (&voice, GRAIN_FINE, iframe);
+					grain.speed = noteToFrequency(float (voice.note) + graintune + 0.01 * grainfine) / controllers[SAMPLE_FREQ];
 
 					float grainsize = modulateGrainProperty (&voice, GRAIN_SIZE, iframe);
 					grain.endFrame = grain.startFrame + millisecondsToFrames (grainsize, rate) * grain.speed;

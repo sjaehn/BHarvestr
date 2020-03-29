@@ -409,7 +409,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.79861111"
-     inkscape:cx="720"
+     inkscape:cx="1020.5217"
      inkscape:cy="440"
      inkscape:document-units="px"
      inkscape:current-layer="g3737"
@@ -1856,34 +1856,34 @@
       <text
          id="text3608"
          y="39.653419"
-         x="346.2579"
+         x="334.61624"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:6.61458302px;font-family:sans-serif;-inkscape-font-specification:sans-serif;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
          xml:space="preserve"><tspan
            style="font-size:3.52777767px;fill:#ff0000;stroke-width:0.26458332"
            y="39.653419"
-           x="346.2579"
+           x="334.61624"
            id="tspan3606"
-           sodipodi:role="line">Pitch</tspan></text>
+           sodipodi:role="line">Tune</tspan></text>
       <text
          id="text3608-9"
          y="39.653419"
-         x="323.50375"
+         x="312.39127"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:6.61458302px;font-family:sans-serif;-inkscape-font-specification:sans-serif;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.26458332;enable-background:new"
          xml:space="preserve"><tspan
            style="font-size:3.52777767px;fill:#ff0000;stroke-width:0.26458332"
            y="39.653419"
-           x="323.50375"
+           x="312.39127"
            id="tspan3606-2"
            sodipodi:role="line">Pan</tspan></text>
       <text
          id="text3608-9-3"
          y="39.653419"
-         x="298.36832"
+         x="287.25583"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:6.61458302px;font-family:sans-serif;-inkscape-font-specification:sans-serif;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.26458332;enable-background:new"
          xml:space="preserve"><tspan
            style="font-size:3.52777767px;fill:#ff0000;stroke-width:0.26458332"
            y="39.653419"
-           x="298.36832"
+           x="287.25583"
            id="tspan3606-2-1"
            sodipodi:role="line">Level</tspan></text>
       <text
@@ -1942,6 +1942,17 @@
            x="312.40698"
            y="-8.7218666"
            style="font-size:3.54120922px;fill:#ff0000;stroke-width:0.2655907">Grain Settings</tspan></text>
+      <text
+         id="text3608-3"
+         y="39.653419"
+         x="358.95828"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:6.61458302px;font-family:sans-serif;-inkscape-font-specification:sans-serif;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;display:inline;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.26458332;enable-background:new"
+         xml:space="preserve"><tspan
+           style="font-size:3.52777767px;fill:#ff0000;stroke-width:0.26458332"
+           y="39.653419"
+           x="358.95828"
+           id="tspan3606-6"
+           sodipodi:role="line">Fine</tspan></text>
     </g>
     <text
        id="text1526-5"

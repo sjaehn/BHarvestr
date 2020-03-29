@@ -238,12 +238,13 @@ BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *f
 	grainWidgets[GRAIN_RATE].rangeDial = RangeDial (100, 30, 60, 60, "dial", 0.5, 0.1, 100, 0, "%2.2f", "", [] (double x) {return pow (x, 1.0 / 3.0);}, [] (double x) {return pow (x, 3.0);});
 	grainWidgets[GRAIN_PHASE].rangeDial = RangeDial (190, 30, 60, 60, "dial", 0, -1, 1, 0, "%1.2f");
 	grainWidgets[GRAIN_DRIVE].rangeDial = RangeDial (280, 30, 60, 60, "dial", 1, -1, 1, 0, "%1.2f");
-	grainWidgets[GRAIN_LEVEL].rangeDial = RangeDial (55, 120, 60, 60, "dial", 1, 0, 2, 0, "%1.2f");
-	grainWidgets[GRAIN_PAN].rangeDial = RangeDial (145, 120, 60, 60, "dial", 0, -1, 1, 0, "%1.2f");
-	grainWidgets[GRAIN_PITCH].rangeDial = RangeDial (235, 120, 60, 60, "dial", 0, -12, 12, 0, "%2.1f", "st");
+	grainWidgets[GRAIN_LEVEL].rangeDial = RangeDial (10, 120, 60, 60, "dial", 1, 0, 2, 0, "%1.2f");
+	grainWidgets[GRAIN_PAN].rangeDial = RangeDial (100, 120, 60, 60, "dial", 0, -1, 1, 0, "%1.2f");
+	grainWidgets[GRAIN_TUNE].rangeDial = RangeDial (190, 120, 60, 60, "dial", 0, -12, 12, 1, "%2.0f", "st");
+	grainWidgets[GRAIN_FINE].rangeDial = RangeDial (280, 120, 60, 60, "dial", 0, -100, 100, 0, "%3.1f", "ct");
 	for (int i = 0; i < NR_GRAIN_PROPERTIES; ++i)
 	{
-		grainWidgets[i].modContainer = BWidgets::Widget (-10 + (i % 4) * 90 + int (i / 4) * 45, 95 + int (i / 4) * 90, 100, 20, "widget");
+		grainWidgets[i].modContainer = BWidgets::Widget (-10 + (i % 4) * 90, 95 + int (i / 4) * 90, 100, 20, "widget");
 		grainWidgets[i].miniMaxiButton = MiniMaximizeButton (75, 5, 10, 10, "redbutton");
 		grainWidgets[i].modBox = BWidgets::Widget (0, 20, 100, 160, "box");
 		grainWidgets[i].modLabel = BWidgets::Label (10, 10, 80, 20, "ctlabel", "Modulation");
@@ -457,8 +458,8 @@ BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *f
 
 	for (int i = 0; i < NR_GRAIN_PROPERTIES; ++i)
 	{
-		grainWidgets[i].miniMaxiButton.setParentMinimizeArea ({-10.0 + (i % 4) * 90.0 + int (i / 4) * 45, 95.0 + int (i / 4) * 90.0, 100, 20});
-		grainWidgets[i].miniMaxiButton.setParentMaximizeArea ({-10.0 + (i % 4) * 90.0 + int (i / 4) * 45, 95.0 + int (i / 4) * 90.0, 100, 185});
+		grainWidgets[i].miniMaxiButton.setParentMinimizeArea ({-10.0 + (i % 4) * 90.0, 95.0 + int (i / 4) * 90.0, 100, 20});
+		grainWidgets[i].miniMaxiButton.setParentMaximizeArea ({-10.0 + (i % 4) * 90.0, 95.0 + int (i / 4) * 90.0, 100, 185});
 		grainWidgets[i].modContainer.setOversize (true);
 	}
 
@@ -1106,10 +1107,10 @@ void BHarvestrGUI::resize ()
 	RESIZE (grainContainer, 1060, 460, 360, 490, sz);
 	for (int i = 0; i < NR_GRAIN_PROPERTIES; ++i)
 	{
-		RESIZE (grainWidgets[i].rangeDial, 10 + (i % 4) * 90 + int (i / 4) * 45, 30 + int (i / 4) * 90, 60, 60, sz);
+		RESIZE (grainWidgets[i].rangeDial, 10 + (i % 4) * 90, 30 + int (i / 4) * 90, 60, 60, sz);
 		RESIZE (grainWidgets[i].miniMaxiButton, 75, 5, 10, 10, sz);
-		grainWidgets[i].miniMaxiButton.setParentMinimizeArea ({(-10.0 + (i % 4) * 90.0 + int (i / 4) * 45) * sz, (95.0 + int (i / 4) * 90.0) * sz, 100 * sz, 20 * sz});
-		grainWidgets[i].miniMaxiButton.setParentMaximizeArea ({(-10.0 + (i % 4) * 90.0 + int (i / 4) * 45) * sz, (95.0 + int (i / 4) * 90.0) * sz, 100 * sz, 185 * sz});
+		grainWidgets[i].miniMaxiButton.setParentMinimizeArea ({(-10.0 + (i % 4) * 90.0) * sz, (95.0 + int (i / 4) * 90.0) * sz, 100 * sz, 20 * sz});
+		grainWidgets[i].miniMaxiButton.setParentMaximizeArea ({(-10.0 + (i % 4) * 90.0) * sz, (95.0 + int (i / 4) * 90.0) * sz, 100 * sz, 185 * sz});
 		RESIZE (grainWidgets[i].modBox, 0, 20, 100, 160, sz);
 		RESIZE (grainWidgets[i].modLabel, 10, 10, 80, 20, sz);
 		for (int j = 0; j < NR_PROPERTY_MODULATORS; ++j)

@@ -76,7 +76,6 @@ button next to the respective dial and selection of a modulator (e.g., Rnd1).
 * Extend MIDI support / features
 * Pitch detection
 * Add process features (filters, reverb, ...)
-* Use two dials to control pitch (st and ct)
 * Find a better solution for the 1024 pattern steps limit
 * Adjust output level to nr of grains
 * Reduce CPU load !!!
