@@ -294,20 +294,40 @@ void BHarvestr::run (uint32_t n_samples)
 			// Pattern changed notifications
 			else if (obj->body.otype == uris.bharvestr_patternEvent)
 			{
-				LV2_Atom *oPd = NULL;
-				lv2_atom_object_get (obj, uris.bharvestr_pattern, &oPd, NULL);
+				LV2_Atom *oPr = NULL, *oPs = NULL, *oPat = NULL;
+				lv2_atom_object_get
+				(
+					obj,
+					uris.bharvestr_patternRows, &oPr,
+					uris.bharvestr_patternSteps, &oPs,
+					uris.bharvestr_pattern, &oPat,
+					NULL
+				);
 
-				// Pad notification
-				if (oPd && (oPd->type == uris.atom_Vector))
+				if (oPr && (oPr->type == uris.atom_Int))
 				{
-					const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oPd;
+					const int rows = ((const LV2_Atom_Int*)oPr)->body;
+					pattern.setRows (rows);
+				}
+
+				// Pattern notification
+				if (oPat && (oPat->type == uris.atom_Vector))
+				{
+					const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oPat;
 					if (vec->body.child_type == uris.atom_Int)
 					{
-						const uint32_t size = (uint32_t) ((oPd->size - sizeof(LV2_Atom_Vector_Body)) / sizeof (int));
+						const uint32_t size = (uint32_t) ((oPat->size - sizeof(LV2_Atom_Vector_Body)) / sizeof (int));
 						int* new_pattern = (int*) (&vec->body + 1);
 						pattern.setPattern (new_pattern, size);
+						controllers[PATTERN_TYPE] = USER_PATTERN;
 						notify.pattern = true;
 					}
+				}
+
+				if (oPs && (oPs->type == uris.atom_Int))
+				{
+					const int steps = ((const LV2_Atom_Int*)oPs)->body;
+					pattern.setSteps (steps);
 				}
 			}
 
@@ -460,7 +480,7 @@ void BHarvestr::run (uint32_t n_samples)
 			}
 		}
 
-		else fprintf (stderr, "BSEQuencer.lv2: Ignored event in Control port (otype = %i, %s)\n", ev->body.type,
+		else fprintf (stderr, "BHarvestr.lv2: Ignored event in Control port (otype = %i, %s)\n", ev->body.type,
 					  (unmap ? unmap->unmap (unmap->handle, ev->body.type) : NULL));
 
 		// Update for this iteration
@@ -529,26 +549,27 @@ LV2_State_Status BHarvestr::state_save (LV2_State_Store_Function store, LV2_Stat
 	if (presetInfo.license[0] != '\0') store (handle, uris.bharvestr_presetInfoLicense, presetInfo.license, strlen (presetInfo.license) + 1, uris.atom_String, LV2_STATE_IS_POD);
 	if (presetInfo.description[0] != '\0') store (handle, uris.bharvestr_presetInfoDescription, presetInfo.description, strlen (presetInfo.description) + 1, uris.atom_String, LV2_STATE_IS_POD);
 
-/*
-	// Store pads
-	char padDataString[0x8010] = "\nMatrix data:\n";
 
-	for (int step = 0; step < MAXSTEPS; ++step)
+	// Store pattern
+	if (controllers[PATTERN_TYPE] == USER_PATTERN)
 	{
-		for (int row = 0; row < MAXSTEPS; ++row)
-		{
-			char valueString[64];
-			int id = step * MAXSTEPS + row;
-			Pad* pd = &pads[row][step];
-			snprintf (valueString, 62, "id:%d; lv:%f", id, pd->level);
-			if ((step < MAXSTEPS - 1) || (row < MAXSTEPS)) strcat (valueString, ";\n");
-			else strcat(valueString, "\n");
-			strcat (padDataString, valueString);
-		}
-	}
-	store (handle, uris.state_pad, padDataString, strlen (padDataString) + 1, uris.atom_String, LV2_STATE_IS_POD);
-*/
+		char patternDataString[0x4010] = "\nPattern data:\n";
+		const int patternSteps = pattern.getSteps();
+		const int patternRows = pattern.getRows();
 
+		for (int s = 0; s < MAXPATTERNSTEPS; ++s)
+		{
+			char valueString[16];
+			int val = pattern.getValue (s);
+			snprintf (valueString, 14, "val:%d;", val);
+			if (s % 8 == 7) strcat (valueString, "\n");
+			else strcat (valueString, " ");
+			strcat (patternDataString, valueString);
+		}
+		store (handle, uris.bharvestr_patternRows, &patternRows, sizeof(patternRows), uris.atom_Int, LV2_STATE_IS_POD);
+		store (handle, uris.bharvestr_patternSteps, &patternSteps, sizeof(patternSteps), uris.atom_Int, LV2_STATE_IS_POD);
+		store (handle, uris.bharvestr_pattern, patternDataString, strlen (patternDataString) + 1, uris.atom_String, LV2_STATE_IS_POD);
+	}
 	return LV2_STATE_SUCCESS;
 }
 
@@ -626,6 +647,67 @@ LV2_State_Status BHarvestr::state_restore (LV2_State_Retrieve_Function retrieve,
 		const char* str = (const char*)presetDescriptionData;
 		strncpy (presetInfo.description, str, LIMIT (strlen (str) + 1, 0, PRESETINFO_MAX_TXT_SIZE - 1));
 		notify.presetInfo = true;
+        }
+
+	// Retrieve pattern data
+	const void* patternRowsData = retrieve (handle, uris.bharvestr_patternRows, &size, &type, &valflags);
+        if (patternRowsData)
+	{
+		const int rows = *(int*)patternRowsData;
+		pattern.setRows (rows);
+        }
+
+	const void* patternStepsData = retrieve (handle, uris.bharvestr_patternSteps, &size, &type, &valflags);
+        if (patternStepsData)
+	{
+		const int steps = *(int*)patternStepsData;
+		pattern.setSteps (steps);
+        }
+
+	const void* patternData = retrieve (handle, uris.bharvestr_pattern, &size, &type, &valflags);
+        if (patternData)
+	{
+		std::string str = (char*)patternData;
+
+		// Parse retrieved data
+		int step = 1;
+		std::vector<int> data = {};
+		while (!str.empty())
+		{
+			// Look for next "val:"
+			size_t strPos = str.find ("val:");
+			size_t nextPos = 0;
+			if (strPos == std::string::npos) break;	// No "val:" found => end
+			if (strPos + 4 > str.length()) break;	// Nothing more after "val:" => end
+			str.erase (0, strPos + 4);
+			if (step > MAXPATTERNSTEPS)
+			{
+				fprintf (stderr, "BHarvestr.lv2: Max. pattern size exceeded. Pattern data truncated at step %i.\n", step);
+				break;
+			}
+			int val;
+			try {val = std::stof (str, &nextPos);}
+			catch  (const std::exception& e)
+			{
+				fprintf (stderr, "BHarvestr.lv2: Restore pattern incomplete. Can't parse step %i from \"%s...\"", step, str.substr (0, 63).c_str());
+				break;
+			}
+
+			if (nextPos > 0) str.erase (0, nextPos);
+			if ((val < 0) || (val >= MAXPATTERNSTEPS))
+			{
+				fprintf (stderr, "BHarvestr.lv2: Restore pattern incomplete. Invalid matrix data loaded for step %i.\n", step);
+				break;
+			}
+			data.push_back (val);
+			++step;
+		}
+
+		// Set pattern
+		pattern.setPattern (USER_PATTERN);
+		pattern.setPattern (data);
+		controllers[PATTERN_TYPE] = USER_PATTERN;
+		notify.pattern = true;
         }
 
 	return LV2_STATE_SUCCESS;
@@ -1130,10 +1212,13 @@ void BHarvestr::notifyPatternToGui ()
 	LV2_Atom_Forge_Frame frame;
 	lv2_atom_forge_frame_time(&notifyForge, 0);
 	lv2_atom_forge_object(&notifyForge, &frame, 0, uris.bharvestr_patternEvent);
+	lv2_atom_forge_key(&notifyForge, uris.bharvestr_patternRows);
+	lv2_atom_forge_int(&notifyForge, pattern.getRows());
+	lv2_atom_forge_key(&notifyForge, uris.bharvestr_patternSteps);
+	lv2_atom_forge_int(&notifyForge, pattern.getSteps());
 	lv2_atom_forge_key(&notifyForge, uris.bharvestr_pattern);
 	lv2_atom_forge_vector(&notifyForge, sizeof(int), uris.atom_Int, MAXPATTERNSTEPS, (void*) pattern.getPattern());
 	lv2_atom_forge_pop(&notifyForge, &frame);
-
 	notify.pattern = false;
 }
 

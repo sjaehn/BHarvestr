@@ -50,6 +50,8 @@ struct BHarvestrURIs
 	LV2_URID bharvestr_selectionPlay;
 	LV2_URID bharvestr_selectionStop;
 	LV2_URID bharvestr_patternEvent;
+	LV2_URID bharvestr_patternRows;
+	LV2_URID bharvestr_patternSteps;
 	LV2_URID bharvestr_pattern;
 	LV2_URID bharvestr_sampleFreeEvent;
 	LV2_URID bharvestr_sampleSetEvent;
@@ -104,6 +106,8 @@ void getURIs (LV2_URID_Map* m, BHarvestrURIs* uris)
 	uris->bharvestr_selectionPlay = m->map(m->handle, BHARVESTR_URI "#selectionPlay");
 	uris->bharvestr_selectionStop = m->map(m->handle, BHARVESTR_URI "#selectionStop");
 	uris->bharvestr_patternEvent = m->map(m->handle, BHARVESTR_URI "#patternEvent");
+	uris->bharvestr_patternRows = m->map(m->handle, BHARVESTR_URI "#patternRows");
+	uris->bharvestr_patternSteps = m->map(m->handle, BHARVESTR_URI "#patternSteps");
 	uris->bharvestr_pattern = m->map(m->handle, BHARVESTR_URI "#pattern");
 	uris->bharvestr_sampleFreeEvent = m->map(m->handle, BHARVESTR_URI "#sampleFreeEvent");
 	uris->bharvestr_sampleSetEvent = m->map(m->handle, BHARVESTR_URI "#sampleSetEvent");

@@ -63,11 +63,7 @@ public:
 		if (rows >= 1)
 		{
 			rows_ = LIMIT (rows, 1, MAXPATTERNSTEPS);
-			if (patternIndex_ == USER_PATTERN)
-			{
-				for (int i = 0; i < MAXPATTERNSTEPS; ++i) values_[i] = LIMIT (values_[i], 0, rows_ - 1);
-			}
-			else setPattern (patternIndex_);
+			if (patternIndex_ != USER_PATTERN) setPattern (patternIndex_);
 		}
 	}
 
@@ -129,7 +125,7 @@ public:
 
 	int* getPattern () {return values_;}
 
-	int getValue (const int step) const {return values_[step];}
+	int getValue (const int step) const {return LIMIT (values_[step], 0, rows_ - 1);}
 
 protected:
 	int steps_;

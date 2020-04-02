@@ -621,8 +621,43 @@ void BHarvestrGUI::port_event(uint32_t port, uint32_t buffer_size,
 			// Pattern notification
 			if (obj->body.otype == uris.bharvestr_patternEvent)
 			{
-				LV2_Atom *oPad = NULL;
-				lv2_atom_object_get(obj, uris.bharvestr_pattern, &oPad, NULL);
+				LV2_Atom *oPr = NULL, *oPs = NULL, *oPat = NULL;
+				lv2_atom_object_get
+				(
+					obj,
+					uris.bharvestr_patternRows, &oPr,
+					uris.bharvestr_patternSteps, &oPs,
+					uris.bharvestr_pattern, &oPat,
+					NULL
+				);
+
+				if (oPr && (oPr->type == uris.atom_Int))
+				{
+					const int rows = ((const LV2_Atom_Int*)oPr)->body;
+					patternWidget.setRows (rows);
+				}
+
+				if (oPs && (oPs->type == uris.atom_Int))
+				{
+					const int steps = ((const LV2_Atom_Int*)oPs)->body;
+					patternWidget.setSteps (steps);
+				}
+
+				if (oPat && (oPat->type == uris.atom_Vector))
+				{
+					const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oPat;
+					if (vec->body.child_type == uris.atom_Int)
+					{
+						const int32_t size = (int32_t) ((oPat->size - sizeof(LV2_Atom_Vector_Body)) / sizeof (int));
+						int* data = (int*) (&vec->body + 1);
+						std::vector<int> values = {};
+						for (int i = 0; i < size; ++i) values.push_back (data[i]);
+						patternWidget.hide();
+						patternWidget.setPattern (USER_PATTERN);
+						patternWidget.setPattern (values);
+						patternWidget.show();
+					}
+				}
 			}
 
 			// Path notification
@@ -1390,10 +1425,15 @@ void BHarvestrGUI::sendPattern ()
 
 	LV2_Atom_Forge_Frame frame;
 	LV2_Atom* msg = (LV2_Atom*)lv2_atom_forge_object(&forge, &frame, 0, uris.bharvestr_patternEvent);
+	lv2_atom_forge_key(&forge, uris.bharvestr_patternRows);
+	lv2_atom_forge_int(&forge, patternWidget.getRows());
+	lv2_atom_forge_key(&forge, uris.bharvestr_patternSteps);
+	lv2_atom_forge_int(&forge, patternWidget.getSteps());
 	lv2_atom_forge_key(&forge, uris.bharvestr_pattern);
-	lv2_atom_forge_vector(&forge, sizeof(int), uris.atom_Int, patternWidget.getSteps(), (void*) patternWidget.getPattern());
+	lv2_atom_forge_vector(&forge, sizeof(int), uris.atom_Int, MAXPATTERNSTEPS, (void*) patternWidget.getPattern());
 	lv2_atom_forge_pop(&forge, &frame);
 	write_function(controller, CONTROL, lv2_atom_total_size(msg), uris.atom_eventTransfer, msg);
+
 }
 
 void BHarvestrGUI::sendKeyboard (const uint8_t note, const bool noteOn)
