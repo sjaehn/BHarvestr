@@ -654,7 +654,7 @@ void BHarvestrGUI::port_event(uint32_t port, uint32_t buffer_size,
 						for (int i = 0; i < size; ++i) values.push_back (data[i]);
 						patternWidget.hide();
 						patternWidget.setPattern (USER_PATTERN);
-						patternWidget.setPattern (values);
+						patternWidget.setValues (values);
 						patternWidget.show();
 					}
 				}
@@ -1430,10 +1430,9 @@ void BHarvestrGUI::sendPattern ()
 	lv2_atom_forge_key(&forge, uris.bharvestr_patternSteps);
 	lv2_atom_forge_int(&forge, patternWidget.getSteps());
 	lv2_atom_forge_key(&forge, uris.bharvestr_pattern);
-	lv2_atom_forge_vector(&forge, sizeof(int), uris.atom_Int, MAXPATTERNSTEPS, (void*) patternWidget.getPattern());
+	lv2_atom_forge_vector(&forge, sizeof(int), uris.atom_Int, MAXPATTERNSTEPS, (void*) patternWidget.getValues());
 	lv2_atom_forge_pop(&forge, &frame);
 	write_function(controller, CONTROL, lv2_atom_total_size(msg), uris.atom_eventTransfer, msg);
-
 }
 
 void BHarvestrGUI::sendKeyboard (const uint8_t note, const bool noteOn)

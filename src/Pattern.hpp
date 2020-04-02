@@ -101,18 +101,20 @@ public:
 		}
 	}
 
-	virtual void setPattern (const int* values, const int steps)
+	PatternIndex getPattern () const {return patternIndex_;}
+
+	virtual void setValues (const int* values, const int steps)
 	{
 		steps_ = LIMIT (steps, 0, MAXPATTERNSTEPS);
 		memcpy (values_, values, steps_ * sizeof (int));
 	}
 
-	virtual void setPattern (const std::vector<int>& values)
+	virtual void setValues (const std::vector<int>& values)
 	{
 		patternIndex_ = USER_PATTERN;
 		for (int i = 0; i < MAXPATTERNSTEPS; ++i)
 		{
-			if (i < int (values.size())) values_[i] = LIMIT (values[i], 0, rows_ - 1);
+			if (i < int (values.size())) values_[i] = values[i];
 			else values_[i] = 0;
 		}
 	}
@@ -120,10 +122,10 @@ public:
 	virtual void setValue (const int step, const int value)
 	{
 		patternIndex_ = USER_PATTERN;
-		if ((step >= 0) && (step < steps_)) values_[step] = LIMIT (value, 0, rows_ -1);
+		if ((step >= 0) && (step < steps_)) values_[step] = value;
 	}
 
-	int* getPattern () {return values_;}
+	int* getValues () {return values_;}
 
 	int getValue (const int step) const {return LIMIT (values_[step], 0, rows_ - 1);}
 

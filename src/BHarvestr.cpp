@@ -318,7 +318,7 @@ void BHarvestr::run (uint32_t n_samples)
 					{
 						const uint32_t size = (uint32_t) ((oPat->size - sizeof(LV2_Atom_Vector_Body)) / sizeof (int));
 						int* new_pattern = (int*) (&vec->body + 1);
-						pattern.setPattern (new_pattern, size);
+						pattern.setValues (new_pattern, size);
 						controllers[PATTERN_TYPE] = USER_PATTERN;
 						notify.pattern = true;
 					}
@@ -705,7 +705,7 @@ LV2_State_Status BHarvestr::state_restore (LV2_State_Retrieve_Function retrieve,
 
 		// Set pattern
 		pattern.setPattern (USER_PATTERN);
-		pattern.setPattern (data);
+		pattern.setValues (data);
 		controllers[PATTERN_TYPE] = USER_PATTERN;
 		notify.pattern = true;
         }
@@ -1209,16 +1209,19 @@ void BHarvestr::notifySelectionStopToGui ()
 
 void BHarvestr::notifyPatternToGui ()
 {
-	LV2_Atom_Forge_Frame frame;
-	lv2_atom_forge_frame_time(&notifyForge, 0);
-	lv2_atom_forge_object(&notifyForge, &frame, 0, uris.bharvestr_patternEvent);
-	lv2_atom_forge_key(&notifyForge, uris.bharvestr_patternRows);
-	lv2_atom_forge_int(&notifyForge, pattern.getRows());
-	lv2_atom_forge_key(&notifyForge, uris.bharvestr_patternSteps);
-	lv2_atom_forge_int(&notifyForge, pattern.getSteps());
-	lv2_atom_forge_key(&notifyForge, uris.bharvestr_pattern);
-	lv2_atom_forge_vector(&notifyForge, sizeof(int), uris.atom_Int, MAXPATTERNSTEPS, (void*) pattern.getPattern());
-	lv2_atom_forge_pop(&notifyForge, &frame);
+	if (pattern.getPattern() == USER_PATTERN)
+	{
+		LV2_Atom_Forge_Frame frame;
+		lv2_atom_forge_frame_time(&notifyForge, 0);
+		lv2_atom_forge_object(&notifyForge, &frame, 0, uris.bharvestr_patternEvent);
+		lv2_atom_forge_key(&notifyForge, uris.bharvestr_patternRows);
+		lv2_atom_forge_int(&notifyForge, pattern.getRows());
+		lv2_atom_forge_key(&notifyForge, uris.bharvestr_patternSteps);
+		lv2_atom_forge_int(&notifyForge, pattern.getSteps());
+		lv2_atom_forge_key(&notifyForge, uris.bharvestr_pattern);
+		lv2_atom_forge_vector(&notifyForge, sizeof(int), uris.atom_Int, MAXPATTERNSTEPS, (void*) pattern.getValues());
+		lv2_atom_forge_pop(&notifyForge, &frame);
+	}
 	notify.pattern = false;
 }
 

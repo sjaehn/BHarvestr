@@ -71,15 +71,15 @@ public:
 		update();
 	}
 
-	virtual void setPattern (const int* values, const int steps) override
+	virtual void setValues (const int* values, const int steps) override
 	{
-		Pattern::setPattern (values, steps);
+		Pattern::setValues (values, steps);
 		update();
 	}
 
-	virtual void setPattern (const std::vector<int>& values) override
+	virtual void setValues (const std::vector<int>& values) override
 	{
-		Pattern::setPattern (values);
+		Pattern::setValues (values);
 		update();
 	}
 
