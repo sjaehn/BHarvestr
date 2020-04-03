@@ -4,10 +4,9 @@ Repository: BHarvestr
 Description: B.Harvestr is an **experimental** granular synthesizer LV2 plugin.
 
 **Warning: B.Harvestr is in an early stage of development. It still produces a heavy CPU load.
-Not for pruducion use! No guarantees! Some essential features including saving and restoring
-the plugin state are not (fully) implemented yet. Major changes in the plugin definition need
-to be expected. Therefore, future versions of this plugin may be completely incompatible to
-this version.**
+Not for pruducion use! No guarantees! Some essential features are not (fully) implemented yet.
+Major changes in the plugin definition need to be expected. Therefore, future versions of this
+plugin may be completely incompatible to this version.**
 
 
 ## Installation
@@ -64,7 +63,7 @@ that may strongly differ from the initial sample.
 
 ### Quick guide
 
-A good starting point is loading a sample. Alternatively, you also may use the default sine wave sample.
+A good starting point is: load a sample. Alternatively, you also may use the default sine wave sample.
 Select a region of the sample by dragging the rulers. Change the size of the grains if you like. Add some
 randomness to the grain rate and/or grain phase and/or grain level and/or grain pitch by clicking the down
 button next to the respective dial and selection of a modulator (e.g., Rnd1).
@@ -72,7 +71,6 @@ button next to the respective dial and selection of a modulator (e.g., Rnd1).
 
 ## TODO
 
-* Save / restore plugin state features: user pattern, user shapes
 * Extend MIDI support / features
 * Pitch detection
 * Add process features (filters, reverb, ...)

@@ -570,6 +570,39 @@ LV2_State_Status BHarvestr::state_save (LV2_State_Store_Function store, LV2_Stat
 		store (handle, uris.bharvestr_patternSteps, &patternSteps, sizeof(patternSteps), uris.atom_Int, LV2_STATE_IS_POD);
 		store (handle, uris.bharvestr_pattern, patternDataString, strlen (patternDataString) + 1, uris.atom_String, LV2_STATE_IS_POD);
 	}
+
+	// Store shapes
+	{
+		char shapesDataString[0x8010] = "Shape data:\n";
+
+		for (int sh = USER_SHAPES; sh < USER_SHAPES + NR_USER_SHAPES; ++sh)
+		{
+			for (unsigned int nd = 0; nd < shape[sh].size (); ++nd)
+			{
+				char valueString[160];
+				Node node = shape[sh].getNode (nd);
+				snprintf
+				(
+					valueString,
+					126,
+					"shp:%d; typ:%d; ptx:%f; pty:%f; h1x:%f; h1y:%f; h2x:%f; h2y:%f",
+					sh,
+					int (node.nodeType),
+					node.point.x,
+					node.point.y,
+					node.handle1.x,
+					node.handle1.y,
+					node.handle2.x,
+					node.handle2.y
+				);
+				if ((sh < USER_SHAPES + NR_USER_SHAPES - 1) || nd < shape[sh].size ()) strcat (valueString, ";\n");
+				else strcat(valueString, "\n");
+				strcat (shapesDataString, valueString);
+			}
+		}
+		store (handle, uris.bharvestr_shapeData, shapesDataString, strlen (shapesDataString) + 1, uris.atom_String, LV2_STATE_IS_POD);
+	}
+
 	return LV2_STATE_SUCCESS;
 }
 
@@ -709,6 +742,99 @@ LV2_State_Status BHarvestr::state_restore (LV2_State_Retrieve_Function retrieve,
 		controllers[PATTERN_TYPE] = USER_PATTERN;
 		notify.pattern = true;
         }
+
+	// Retrieve shapes
+	const void* shapesData = retrieve(handle, uris.bharvestr_shapeData, &size, &type, &valflags);
+	if (shapesData && (type == uris.atom_String))
+	{
+		// Clear old shapes first
+		for (int sh = USER_SHAPES; sh < USER_SHAPES + NR_USER_SHAPES; ++sh) shape[sh].clearShape();
+
+		// Parse retrieved data
+		std::string shapesDataString = (char*) shapesData;
+		const std::string keywords[8] = {"shp:", "typ:", "ptx:", "pty:", "h1x:", "h1y:", "h2x:", "h2y:"};
+		while (!shapesDataString.empty())
+		{
+			// Look for next "shp:"
+			size_t strPos = shapesDataString.find ("shp:");
+			size_t nextPos = 0;
+			if (strPos == std::string::npos) break;	// No "shp:" found => end
+			if (strPos + 4 > shapesDataString.length()) break;	// Nothing more after id => end
+			shapesDataString.erase (0, strPos + 4);
+
+			int sh;
+			try {sh = std::stof (shapesDataString, &nextPos);}
+			catch  (const std::exception& e)
+			{
+				fprintf (stderr, "BHarvestr.lv2: Restore shape state incomplete. Can't parse shape number from \"%s...\"", shapesDataString.substr (0, 63).c_str());
+				break;
+			}
+
+			if (nextPos > 0) shapesDataString.erase (0, nextPos);
+			if ((sh < 0) || (sh >= USER_SHAPES + NR_USER_SHAPES))
+			{
+				fprintf (stderr, "BHarvestr.lv2: Restore shape state incomplete. Invalid matrix data block loaded for shape %i.\n", sh);
+				break;
+			}
+
+			// Look for shape data
+			Node node = {NodeType::POINT_NODE, {0, 0}, {0, 0}, {0, 0}};
+			bool isTypeDef = false;
+			for (int i = 1; i < 9; ++i)
+			{
+				strPos = shapesDataString.find (keywords[i]);
+				if (strPos == std::string::npos) continue;	// Keyword not found => next keyword
+				if (strPos + 4 >= shapesDataString.length())	// Nothing more after keyword => end
+				{
+					shapesDataString ="";
+					break;
+				}
+				if (strPos > 0) shapesDataString.erase (0, strPos + 4);
+				float val;
+				try {val = std::stof (shapesDataString, &nextPos);}
+				catch  (const std::exception& e)
+				{
+					fprintf (stderr, "Harvestr.lv2: Restore shape state incomplete. Can't parse %s from \"%s...\"",
+							 keywords[i].substr(0,3).c_str(), shapesDataString.substr (0, 63).c_str());
+					break;
+				}
+
+				if (nextPos > 0) shapesDataString.erase (0, nextPos);
+				switch (i)
+				{
+					case 1: node.nodeType = (NodeType)((int)val);
+						isTypeDef = true;
+						break;
+					case 2: node.point.x = val;
+						break;
+					case 3:	node.point.y = val;
+						break;
+					case 4:	node.handle1.x = val;
+						break;
+					case 5:	node.handle1.y = val;
+						break;
+					case 6:	node.handle2.x = val;
+						break;
+					case 7:	node.handle2.y = val;
+						break;
+					default:break;
+				}
+			}
+
+			// Set data
+			if (isTypeDef) shape[sh].appendNode (node);
+		}
+
+		// Validate all shapes
+		for (int sh = USER_SHAPES; sh < USER_SHAPES + NR_USER_SHAPES; ++sh)
+		{
+			if (shape[sh].size () < 2) shape[sh].setDefaultShape ();
+			else if (!shape[sh].validateShape ()) shape[sh].setDefaultShape ();
+		}
+
+		// Force GUI notification
+		for (int sh = USER_SHAPES; sh < USER_SHAPES + NR_USER_SHAPES; ++sh) notify.shape[sh] = true;
+	}
 
 	return LV2_STATE_SUCCESS;
 }
