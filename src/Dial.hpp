@@ -142,7 +142,7 @@ protected:
 
 				// Circle
 				cairo_set_line_width (cr, 1.0);
-				cairo_pattern_t* pat = cairo_pattern_create_radial (x1, y1, 0.01 * d, x1, y1, 0.99 * d);
+				cairo_pattern_t* pat = cairo_pattern_create_linear (x1, y1, xc, yc);
 				cairo_pattern_add_color_stop_rgba (pat, 0, slColor.getRed (), slColor.getGreen (), slColor.getBlue (), slColor.getAlpha ());
 				cairo_pattern_add_color_stop_rgba (pat, 1, slColor.getRed (), slColor.getGreen (), slColor.getBlue (), 0.1 * slColor.getAlpha ());
 				cairo_set_source (cr, pat);
