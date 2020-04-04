@@ -434,30 +434,37 @@ void BHarvestr::run (uint32_t n_samples)
 		else if (ev->body.type == uris.midi_Event)
 		{
 			const uint8_t* const msg = (const uint8_t*)(ev + 1);
-			uint8_t typ = lv2_midi_message_type(msg);
+			const uint8_t typ = lv2_midi_message_type(msg);
 			//uint8_t chn = msg[0] & 0x0F;
-			uint8_t note = msg[1];
 
 			switch (typ)
 			{
 
 				case LV2_MIDI_MSG_NOTE_ON:
 				{
-					if (msg[2] != 0)
+					const uint8_t note = msg[1];
+					const uint8_t velocity = msg[2];
+					if (velocity != 0)
 					{
-						noteOn (note, msg[2], frame + ev->time.frames);
+						noteOn (note, velocity, frame + ev->time.frames);
 						break;
 					}
 					// Otherwise continue with note off
 				}
+				// No break here!
 
 				case LV2_MIDI_MSG_NOTE_OFF:
-				noteOff (note, frame + ev->time.frames);
+				{
+					const uint8_t note = msg[1];
+					noteOff (note, frame + ev->time.frames);
+				}
 				break;
 
 				case LV2_MIDI_MSG_CONTROLLER:
 				{
-					switch (note)
+					const uint8_t cc = msg[1];
+
+					switch (cc)
 					{
 
 						// LV2_MIDI_CTL_SUSTAIN: Forward to all outputs
