@@ -465,11 +465,13 @@ void BHarvestr::run (uint32_t n_samples)
 
 						// LV2_MIDI_CTL_ALL_SOUNDS_OFF: Stop all outputs
 						case LV2_MIDI_CTL_ALL_SOUNDS_OFF:
+						allSoundsOff (frame + ev->time.frames);
+						break;
 
-						// LV2_MIDI_CTL_ALL_NOTES_OFF: Stop all outputs and delete all keys
-						// As B.SEQuencer doesn't interpret LV2_MIDI_CTL_SUSTAIN itself, the
-						// result is the same as in LV2_MIDI_CTL_ALL_SOUNDS_OFF
+						// LV2_MIDI_CTL_ALL_NOTES_OFF: Stop all voices
 						case LV2_MIDI_CTL_ALL_NOTES_OFF:
+						allNotesOff (frame + ev->time.frames);
+						break;
 
 						// All other MIDI signals
 						default: break;
@@ -974,11 +976,32 @@ void BHarvestr::noteOn (const uint8_t note, const uint8_t velocity, const uint64
 		voices.push_back (voice);
 	}
 }
+
 void BHarvestr::noteOff (const uint8_t note, const uint64_t frame)
 {
 	for (Voice** it = voices.begin(); it < voices.end(); ++it)
 	{
 		if (((**it).note == note) && (frame < (**it).endFrame))
+		{
+			(**it).endFrame = frame;
+			const int envNr = controllers[SYNTH_ENV];
+			const double pos = framesToSeconds (frame - (**it).startFrame, rate);
+			(**it).endValue = env[envNr].getValue (true, pos);
+		}
+	}
+}
+
+void BHarvestr::allSoundsOff (const uint64_t frame)
+{
+	// TODO
+	voices.clear();
+}
+
+void BHarvestr::allNotesOff (const uint64_t frame)
+{
+	for (Voice** it = voices.begin(); it < voices.end(); ++it)
+	{
+		if (frame < (**it).endFrame)
 		{
 			(**it).endFrame = frame;
 			const int envNr = controllers[SYNTH_ENV];
@@ -1161,8 +1184,8 @@ void BHarvestr::play (const int start, const int end)
 				float f =
 				(
 					iframe <= voice.endFrame ?
-					env[envNr].getValue (true, framesToSeconds (iframe - voice.startFrame, rate)) :
-					env[envNr].getValue (false, framesToSeconds (iframe - voice.endFrame, rate), voice.endValue)
+					env[envNr].getValue (true, framesToSeconds (iframe - voice.startFrame, rate)) * float (voice.velocity) / 127.0 :
+					env[envNr].getValue (false, framesToSeconds (iframe - voice.endFrame, rate), voice.endValue) * float (voice.velocity) / 127.0
 				);
 				isample1 += vsample1 * f;
 				isample2 += vsample2 * f;

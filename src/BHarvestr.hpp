@@ -69,6 +69,8 @@ private:
 	void installSample (Sample* s);
 	void noteOn (const uint8_t note, const uint8_t velocity, const uint64_t frame);
 	void noteOff (const uint8_t note, const uint64_t frame);
+	void allSoundsOff (const uint64_t frame);
+	void allNotesOff (const uint64_t frame);
 	void play (const int start, const int end);
 	double modulateGrainProperty (const Voice* voiceptr, const int property, const uint64_t frame) const;
 	void notifyStatusToGui();

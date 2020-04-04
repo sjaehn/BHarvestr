@@ -79,6 +79,8 @@ button next to the respective dial and selection of a modulator (e.g., Rnd1).
 * Reduce CPU load !!!
 * Move notification handler to worker process
 * Enable multi-line text edit
+* Improve modulator selection dialog
+* Keyboard mapping
 * Write documentation
 * Create presets
 
