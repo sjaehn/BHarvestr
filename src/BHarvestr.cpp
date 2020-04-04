@@ -462,6 +462,7 @@ void BHarvestr::run (uint32_t n_samples)
 
 						// LV2_MIDI_CTL_SUSTAIN: Forward to all outputs
 						case LV2_MIDI_CTL_SUSTAIN:
+						break;
 
 						// LV2_MIDI_CTL_ALL_SOUNDS_OFF: Stop all outputs
 						case LV2_MIDI_CTL_ALL_SOUNDS_OFF:
