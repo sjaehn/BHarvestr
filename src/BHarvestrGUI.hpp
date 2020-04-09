@@ -232,8 +232,16 @@ private:
 	ValueSelect patternSizeSelect;
 	BWidgets::PopupListBox patternTypeListBox;
 
-	BWidgets::Widget processContainer;
-	BWidgets::PopupListBox processSynthEnvListBox;
+	struct ProcessWidget
+	{
+		RangeDial rangeDial;
+		BWidgets::Widget modContainer;
+		MiniMaximizeButton miniMaxiButton;
+		BWidgets::Widget modBox;
+		BWidgets::Label modLabel;
+		std::array<BWidgets::PopupListBox, NR_PROPERTY_MODULATORS> modListBoxes;
+	};
+	std::array<ProcessWidget, NR_SYNTH_PROPERTIES> processWidgets;
 
 	BWidgets::HPianoRoll pianoRoll;
 

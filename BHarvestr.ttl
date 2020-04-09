@@ -137,7 +137,7 @@
                 lv2:index 6 ;
                 lv2:symbol "sample_start" ;
                 lv2:name "Sample start" ;
-                lv2:default 0.0 ;
+                lv2:default 0.1 ;
 		lv2:minimum 0.0 ;
                 lv2:maximum 1.0 ;
         ] , [
@@ -145,7 +145,7 @@
 		lv2:index 7 ;
 		lv2:symbol "sample_end" ;
 		lv2:name "Sample end" ;
-                lv2:default 1.0 ;
+                lv2:default 0.9 ;
 		lv2:minimum 0.0 ;
                 lv2:maximum 1.0 ;
 	] , [
@@ -2173,16 +2173,110 @@
 	] , [
 		a lv2:InputPort , lv2:ControlPort ;
 		lv2:index 176 ;
-		lv2:symbol "synth_envelope" ;
-		lv2:name "Synth envelope" ;
+		lv2:symbol "level_value_start" ;
+		lv2:name "Minimal level" ;
+		lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 2.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 177 ;
+		lv2:symbol "level_value_end" ;
+		lv2:name "Maximal level" ;
+		lv2:default 1.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 2.0 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 178 ;
+		lv2:symbol "level_modulator_1" ;
+		lv2:name "Level modulator 1" ;
 		lv2:portProperty lv2:integer, lv2:enumeration ;
-		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 0 ] ;
-		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 1 ] ;
-		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 2 ] ;
-		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:default 1 ;
+		lv2:minimum 1 ;
+		lv2:maximum 4 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 179 ;
+		lv2:symbol "level_modulator_2" ;
+		lv2:name "Level modulator 2" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
 		lv2:default 0 ;
 		lv2:minimum 0 ;
-		lv2:maximum 3 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 180 ;
+		lv2:symbol "level_modulator_3" ;
+		lv2:name "Level modulator 3" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
+	] , [
+		a lv2:InputPort , lv2:ControlPort ;
+		lv2:index 181 ;
+		lv2:symbol "level_modulator_4" ;
+		lv2:name "Level modulator 4" ;
+		lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "None"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 1"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 2"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 3"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Envelope 4"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 1"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 2"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 3"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "LFO 4"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 1"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 2"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 3"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Sequencer 4"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Random 1"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "Random 2"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "Random 3"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "Random 4"; rdf:value 16 ] ;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 16 ;
 	] ;
 
 	state:state [

@@ -22,52 +22,74 @@
 #define ENVELOPE_HPP_
 
 #include <cmath>
+#include <limits>
+#include <cstdio>
 #define M_EXP_M3 0.049787068
 
-struct Envelope
+class Envelope
 {
-        double attack;
-        double decay;
-        double sustain;
-        double release;
+protected:
+        double attack_;
+        double decay_;
+        double sustain_;
+        double release_;
+        double releaseStartTime_;
+        double releaseStartValue_;
 
-        double getValue (const bool noteOn, const double time, double startValue = NAN) const
+public:
+        Envelope () : Envelope (0.0, 0.0, 0.0, 0.0) {}
+
+        Envelope (const double attack, const double decay, const double sustain, const double release) :
+        attack_ (attack),
+        decay_ (decay),
+        sustain_ (sustain),
+        release_ (release),
+        releaseStartTime_ (std::numeric_limits<double>::max()),
+        releaseStartValue_ (0.0)
+        {}
+
+        void releaseAt (const double time)
         {
-                if (noteOn)
+                releaseStartTime_ = std::numeric_limits<double>::max();
+                releaseStartValue_ = getValue (time);
+                releaseStartTime_ = time;
+        }
+
+        double getValue (const double time) const
+        {
+                if (time < releaseStartTime_)
                 {
                         if (time < 0.0) return 0.0;
 
-                        if (time < attack)
+                        if (time < attack_)
                         {
-                                double t = time / attack;
+                                double t = time / attack_;
                                 return (1.0 - exp (-3.0 * t) + t * M_EXP_M3);
                         }
 
-                        if (time == attack) return 1.0;
+                        if (time == attack_) return 1.0;
 
-                        if (time < attack + decay)
+                        if (time < attack_ + decay_)
                         {
-                                double t = (time - attack) / decay;
-                                return 1.0 - (1.0 - sustain) * (1.0 - exp (-3.0 * t) + t * M_EXP_M3);
+                                double t = (time - attack_) / decay_;
+                                return 1.0 - (1.0 - sustain_) * (1.0 - exp (-3.0 * t) + t * M_EXP_M3);
                         }
 
-                        return sustain;
+                        return sustain_;
                 }
                 else
                 {
-                        if (std::isnan (startValue)) startValue = sustain;
-
-                        if (time <= 0.0) return startValue;
-
-                        if (time < release)
+                        if (time < releaseStartTime_ + release_)
                         {
-                                double t = time / release;
-                                return startValue - startValue * (1.0 - exp (-3.0 * t) + t * M_EXP_M3);
+                                double t = (time - releaseStartTime_) / release_;
+                                return releaseStartValue_ - releaseStartValue_ * (1.0 - exp (-3.0 * t) + t * M_EXP_M3);
                         }
 
                         return 0.0;
                 }
         }
+
+        double getRelease() const {return release_;}
 
 };
 

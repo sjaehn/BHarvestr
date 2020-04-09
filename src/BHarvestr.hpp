@@ -72,7 +72,7 @@ private:
 	void allSoundsOff (const uint64_t frame);
 	void allNotesOff (const uint64_t frame);
 	void play (const int start, const int end);
-	double modulateGrainProperty (const Voice* voiceptr, const int property, const uint64_t frame) const;
+	double getModulation (const Voice* voiceptr, const int property, const uint64_t frame) const;
 	void notifyStatusToGui();
 	void notifySampleStopToGui();
 	void notifySelectionStopToGui();
@@ -278,7 +278,12 @@ private:
 		{0.0, 4.0, 0},		// ENV_DECAY
 		{0.0, 1.0, 0},		// ENV_SUSTAIN
 		{0.0, 4.0, 0},		// ENV_RELEASE
-		{0, 3, 1}		// SYNTH_ENV
+		{0, 2, 0},		// SYNTH_LEVEL + PROPERTY_VALUE_START
+		{0, 2, 0},		// SYNTH_LEVEL + PROPERTY_VALUE_END
+		{1, 4, 1},		// SYNTH_LEVEL + PROPERTY_MODULATORS
+		{0, 16, 1},		// SYNTH_LEVEL + PROPERTY_MODULATORS + 1
+		{0, 16, 1},		// SYNTH_LEVEL + PROPERTY_MODULATORS + 2
+		{0, 16, 1}		// SYNTH_LEVEL + PROPERTY_MODULATORS + 3
 	};
 
 	// Pattern
@@ -292,7 +297,6 @@ private:
 
 	Lfo lfo[NR_LFOS];
 	Sequencer<NR_SEQ_STEPS> seq[NR_SEQS];
-	Envelope env[NR_ENVS];
 	Shape<MAXNODES> shape[MAXSHAPES];
 	PresetInfo presetInfo;
 

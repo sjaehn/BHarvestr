@@ -67,7 +67,7 @@ BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *f
 	samplePlayButton (593, 0, 12, 12, "button"),
 	sampleSelectionPlayButton (593, 15, 12, 12, "button"),
 
-	patternContainer (400, 330, 640, 340, "widget"),
+	patternContainer (400, 330, 640, 460, "widget"),
 	patternWidget (10, 25, 620, 275, "pattern"),
 	patternSelectionWidget (10, 25, 620, 275, "selection"),
 	patternSizeSelect (350, 310, 90, 20, "select", 1, 0.01, 8, 0.01, "%1.2f"),
@@ -85,21 +85,7 @@ BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *f
 		0
 	),
 
-	processContainer (400, 690, 640, 100, "widget"),
-	processSynthEnvListBox
-	(
-		570, 50, 60, 20, 60, 100, "menu",
-		BItems::ItemList
-		({
-			{0, "Env1"},
-			{1, "Env2"},
-			{2, "Env3"},
-			{3, "Env4"}
-		}),
-		0
-	),
-
-	pianoRoll (400, 810, 640, 70, "piano", 0, 127),
+	pianoRoll (400, 830, 640, 50, "piano", 0, 127),
 
 	shapeContainer (1060, 200, 360, 240, "widget"),
 	shapeScreen (2, 58, 356, 180, "screen"),
@@ -228,6 +214,49 @@ BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *f
 		for (int j = 0; j < MAXVOICES; ++j) envWidgets[i].horizonWidgets[j] = VLine (0, 0, 2, 150, "widget");
 	}
 
+	// processWidgets
+	processWidgets[SYNTH_LEVEL].rangeDial = RangeDial (570, 390, 60, 60, "dial", 1.0, 0.0, 2.0, 0, "%1.2f");
+	BItems::ItemList envItemList = BItems::ItemList
+	({
+		{1, "Env1"},
+		{2, "Env2"},
+		{3, "Env3"},
+		{4, "Env4"}
+	});
+	BItems::ItemList modItemList = BItems::ItemList
+	({
+		{0, "None"},
+		{1, "Env1"},
+		{2, "Env2"},
+		{3, "Env3"},
+		{4, "Env4"},
+		{5, "LFO1"},
+		{6, "LFO2"},
+		{7, "LFO3"},
+		{8, "LFO4"},
+		{9, "Seq1"},
+		{10, "Seq2"},
+		{11, "Seq3"},
+		{12, "Seq4"},
+		{13, "Rnd1"},
+		{14, "Rnd2"},
+		{15, "Rnd3"},
+		{16, "Rnd4"}
+	});
+
+	for (int i = 0; i < NR_SYNTH_PROPERTIES; ++i)
+	{
+		processWidgets[i].modContainer = BWidgets::Widget (540 - i * 90, 455, 100, 20, "widget");
+		processWidgets[i].miniMaxiButton = MiniMaximizeButton (75, 5, 10, 10, "redbutton");
+		processWidgets[i].modBox = BWidgets::Widget (0, 20, 100, 160, "box");
+		processWidgets[i].modLabel = BWidgets::Label (10, 10, 80, 20, "ctlabel", "Modulation");
+		for (int j = 0; j < NR_PROPERTY_MODULATORS; ++j)
+		{
+			if ((i == SYNTH_LEVEL) && (j == 0)) processWidgets[i].modListBoxes[j] = BWidgets::PopupListBox (10, 40 + j * 30, 80, 20, 80, 120, "menu", envItemList, 0);
+			else processWidgets[i].modListBoxes[j] = BWidgets::PopupListBox (10, 40 + j * 30, 80, 20, 80, 120, "menu", modItemList, 0);
+		}
+	}
+
 	// Shape widgets
 	for (int i = 0; i < USER_SHAPES + NR_USER_SHAPES; ++i) shapeWidgets[i] = ShapeWidget (8, 58, 344, 144, "shape");
 	for (int i = 1; i < NR_TOOLS; ++i) shapeToolButtons[i - 1] = HaloToggleButton (8 + (i - 1) * 30, 210, 24, 24, "halobutton", toolLabels[i - 1]);
@@ -250,31 +279,7 @@ BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *f
 		grainWidgets[i].modLabel = BWidgets::Label (10, 10, 80, 20, "ctlabel", "Modulation");
 		for (int j = 0; j < NR_PROPERTY_MODULATORS; ++j)
 		{
-			grainWidgets[i].modListBoxes[j] = BWidgets::PopupListBox
-			(
-				10, 40 + j * 30, 80, 20, 80, 120, "menu",
-				BItems::ItemList
-				({
-					{0, "None"},
-					{1, "LFO1"},
-					{2, "LFO2"},
-					{3, "LFO3"},
-					{4, "LFO4"},
-					{5, "Seq1"},
-					{6, "Seq2"},
-					{7, "Seq3"},
-					{8, "Seq4"},
-					{9, "Env1"},
-					{10, "Env2"},
-					{11, "Env3"},
-					{12, "Env4"},
-					{13, "Rnd1"},
-					{14, "Rnd2"},
-					{15, "Rnd3"},
-					{16, "Rnd4"}
-				}),
-				0
-			);
+			grainWidgets[i].modListBoxes[j] = BWidgets::PopupListBox (10, 40 + j * 30, 80, 20, 80, 120, "menu", modItemList, 0);
 		}
 	}
 
@@ -288,6 +293,16 @@ BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *f
 
 	controllerWidgets[PATTERN_SIZE] = (BWidgets::ValueWidget*) &patternSizeSelect;
 	controllerWidgets[PATTERN_TYPE] = (BWidgets::ValueWidget*) &patternTypeListBox;
+
+	for (int i = 0; i < NR_SYNTH_PROPERTIES; ++i)
+	{
+		controllerWidgets[SYNTH + i * PROPERTIES_SIZE + PROPERTY_VALUE_START] = (BWidgets::ValueWidget*) &processWidgets[i].rangeDial;
+		controllerWidgets[SYNTH + i * PROPERTIES_SIZE + PROPERTY_VALUE_END] = (BWidgets::ValueWidget*) &processWidgets[i].rangeDial;
+		for (int j = 0; j < NR_PROPERTY_MODULATORS; ++j)
+		{
+			controllerWidgets[SYNTH + i * PROPERTIES_SIZE + PROPERTY_MODULATORS + j] = (BWidgets::ValueWidget*) &processWidgets[i].modListBoxes[j];
+		}
+	}
 
 	for (int i = 0; i < NR_GRAIN_PROPERTIES; ++i)
 	{
@@ -334,7 +349,6 @@ BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *f
 		controllerWidgets[ENVS + i * ENV_SIZE + ENV_RELEASE] = (BWidgets::ValueWidget*) &envWidgets[i].releaseSlider;
 	}
 
-	controllerWidgets[SYNTH_ENV] = (BWidgets::ValueWidget*) &processSynthEnvListBox;
 	controllerWidgets[PATTERN_TYPE] = (BWidgets::ValueWidget*) &patternTypeListBox;
 	controllerWidgets[PATTERN_TYPE] = (BWidgets::ValueWidget*) &patternTypeListBox;
 	controllerWidgets[PATTERN_TYPE] = (BWidgets::ValueWidget*) &patternTypeListBox;
@@ -436,6 +450,14 @@ BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *f
 	patternSelectionWidget.setLineWidth (1.0);
 	patternSelectionWidget.setClickable (false);
 	patternSelectionWidget.setScrollable (false);
+
+	for (int i = 0; i < NR_SYNTH_PROPERTIES; ++i)
+	{
+		processWidgets[i].miniMaxiButton.setParentMinimizeArea ({540.0 - i * 90.0, 455, 100, 20});
+		processWidgets[i].miniMaxiButton.setParentMaximizeArea ({540.0 - i * 90.0, 260, 100, 215});
+		processWidgets[i].miniMaxiButton.moveTo ({75, 5}, {75, 200});
+		processWidgets[i].modContainer.setOversize (true);
+	}
 
 	shapeToolButtons[POINT_NODE_TOOL - 1].setValue (1.0);
 	for (int i = 0; i < USER_SHAPES + NR_USER_SHAPES; ++i)
@@ -541,7 +563,15 @@ BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *f
 	patternContainer.add (patternSizeSelect);
 	patternContainer.add (patternTypeListBox);
 
-	processContainer.add (processSynthEnvListBox);
+	for (int i = NR_SYNTH_PROPERTIES - 1; i >= 0; --i)
+	{
+		patternContainer.add (processWidgets[i].rangeDial);
+		processWidgets[i].modContainer.add (processWidgets[i].miniMaxiButton);
+		processWidgets[i].modBox.add (processWidgets[i].modLabel);
+		for (int j = 0; j < NR_PROPERTY_MODULATORS; ++j) processWidgets[i].modBox.add (processWidgets[i].modListBoxes[j]);
+		processWidgets[i].modContainer.add (processWidgets[i].modBox);
+		patternContainer.add (processWidgets[i].modContainer);
+	}
 
 	for (int i = 0; i < USER_SHAPES + NR_USER_SHAPES; ++i) shapeContainer.add (shapeWidgets[i]);
 	for (int i = 1; i < NR_TOOLS; ++i) shapeContainer.add (shapeToolButtons[i - 1]);
@@ -563,7 +593,6 @@ BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *f
 	mContainer.add (grainContainer);
 	mContainer.add (shapeContainer);
 	mContainer.add (pianoRoll);
-	mContainer.add (processContainer);
 	mContainer.add (patternContainer);
 	mContainer.add (sampleContainer);
 	mContainer.add (envContainer);
@@ -974,6 +1003,18 @@ void BHarvestrGUI::port_event(uint32_t port, uint32_t buffer_size,
 			else controllerWidgets[port - CONTROLLERS]->setValue (*pval);
 		}
 
+		// Process / Synth properties
+		if ((controllerNr >= SYNTH) && (controllerNr < SYNTH + NR_SYNTH_PROPERTIES * PROPERTIES_SIZE))
+		{
+			int property = (controllerNr - SYNTH) / PROPERTIES_SIZE;
+			int param = (controllerNr - SYNTH) % PROPERTIES_SIZE;
+
+			// Range sliders: Manually set start or end
+			if (param == PROPERTY_VALUE_START) processWidgets[property].rangeDial.setStartValue (*pval);
+			else if (param == PROPERTY_VALUE_END) processWidgets[property].rangeDial.setEndValue (*pval);
+			else controllerWidgets[port - CONTROLLERS]->setValue (*pval);
+		}
+
 		else controllerWidgets[port - CONTROLLERS]->setValue (*pval);
 	}
 
@@ -1112,7 +1153,7 @@ void BHarvestrGUI::resize ()
 	RESIZE (samplePlayButton, 593, 0, 12, 12, sz);
 	RESIZE (sampleSelectionPlayButton, 593, 15, 12, 12, sz);
 
-	RESIZE (patternContainer, 400, 330, 640, 340, sz);
+	RESIZE (patternContainer, 400, 330, 640, 460, sz);
 	RESIZE (patternWidget, 10, 25, 620, 275, sz);
 	RESIZE (patternSelectionWidget, 10, 25, 620, 275, sz);
 	RESIZE (patternSizeSelect, 350, 310, 90, 20, sz);
@@ -1121,13 +1162,25 @@ void BHarvestrGUI::resize ()
 	patternTypeListBox.moveListBox(BUtilities::Point (0, 20 * sz));
 	patternTypeListBox.resizeListBoxItems(BUtilities::Point (180 * sz, 20 * sz));
 
-	RESIZE (processContainer, 400, 690, 640, 100, sz);
-	RESIZE (processSynthEnvListBox, 570, 50, 60, 20, sz);
-	processSynthEnvListBox.resizeListBox(BUtilities::Point (60 * sz, 100 * sz));
-	processSynthEnvListBox.moveListBox(BUtilities::Point (0, 20 * sz));
-	processSynthEnvListBox.resizeListBoxItems(BUtilities::Point (60 * sz, 20 * sz));
+	for (int i = 0; i < NR_SYNTH_PROPERTIES; ++i)
+	{
+		RESIZE (processWidgets[i].rangeDial, 570 - i * 90, 390, 60, 60, sz);
+		processWidgets[i].miniMaxiButton.moveTo ({75 * sz, 5 * sz}, {75 * sz, 200 * sz});
+		processWidgets[i].miniMaxiButton.resize (10 * sz, 10 * sz);
+		processWidgets[i].miniMaxiButton.setParentMinimizeArea ({(540 - i * 90) * sz, 455 * sz, 100 * sz, 20 * sz});
+		processWidgets[i].miniMaxiButton.setParentMaximizeArea ({(540 - i * 90) * sz, 260 * sz, 100 * sz, 215 * sz});
+		RESIZE (processWidgets[i].modBox, 0, 20, 100, 160, sz);
+		RESIZE (processWidgets[i].modLabel, 10, 10, 80, 20, sz);
+		for (int j = 0; j < NR_PROPERTY_MODULATORS; ++j)
+		{
+			RESIZE (processWidgets[i].modListBoxes[j], 10, 40 + j * 30, 80, 20, sz);
+			processWidgets[i].modListBoxes[j].resizeListBox(BUtilities::Point (80 * sz, 120 * sz));
+			processWidgets[i].modListBoxes[j].moveListBox(BUtilities::Point (0, 20 * sz));
+			processWidgets[i].modListBoxes[j].resizeListBoxItems(BUtilities::Point (80 * sz, 20 * sz));
+		}
+	}
 
-	RESIZE (pianoRoll, 400, 810, 640, 70, sz);
+	RESIZE (pianoRoll, 400, 830, 640, 50, sz);
 
 	RESIZE (shapeContainer, 1060, 200, 360, 240, sz);
 	RESIZE (shapeScreen, 2, 58, 356, 180, sz);
@@ -1249,8 +1302,16 @@ void BHarvestrGUI::applyTheme (BStyles::Theme& theme)
 	patternSizeSelect.applyTheme (theme);
 	patternTypeListBox.applyTheme (theme);
 
-	processContainer.applyTheme (theme);
-	processSynthEnvListBox.applyTheme (theme);
+	for (int i = PROPERTIES; i < PROPERTIES + NR_SYNTH_PROPERTIES * PROPERTIES_SIZE; ++i) controllerWidgets[i]->applyTheme (theme);
+	for (int i = 0; i < NR_SYNTH_PROPERTIES; ++i)
+	{
+		processWidgets[i].rangeDial.applyTheme (theme);
+		processWidgets[i].modContainer.applyTheme (theme);
+		processWidgets[i].miniMaxiButton.applyTheme (theme);
+		processWidgets[i].modBox.applyTheme (theme);
+		processWidgets[i].modLabel.applyTheme (theme);
+		for (int j = 0; j < NR_PROPERTY_MODULATORS; ++j) processWidgets[i].modListBoxes[j].applyTheme (theme);
+	}
 
 	shapeContainer.applyTheme (theme);
 	for (int i = 0; i < USER_SHAPES + NR_USER_SHAPES; ++i) shapeWidgets[i].applyTheme (theme);
@@ -2067,7 +2128,8 @@ std::vector<BUtilities::Point> BHarvestrGUI::makeLfo (const LfoIndex lfoId, cons
 std::vector<BUtilities::Point> BHarvestrGUI::makeEnv (const double attack, const double decay, const double sustain, const double release) const
 {
 	std::vector<BUtilities::Point> points = {};
-	Envelope env = {attack, decay, sustain, release};
+	Envelope env = Envelope (attack, decay, sustain, release);
+	env.releaseAt (attack + decay + 4.0);
 	double size = 16.0;
 
 	points.push_back (BUtilities::Point (0.0, 0.0));
@@ -2076,14 +2138,14 @@ std::vector<BUtilities::Point> BHarvestrGUI::makeEnv (const double attack, const
 	for (int i = 0; i < 10; ++i)
 	{
 		double t = double (i) * 0.1 * attack;
-		points.push_back (BUtilities::Point (t / size, env.getValue (true, t)));
+		points.push_back (BUtilities::Point (t / size, env.getValue (t)));
 	}
 
 	// Decay
 	for (int i = 0; i < 10; ++i)
 	{
 		double t = attack + double (i) * 0.1 * decay;
-		points.push_back (BUtilities::Point (t / size, env.getValue (true, t)));
+		points.push_back (BUtilities::Point (t / size, env.getValue (t)));
 	}
 
 	// Sustain
@@ -2092,8 +2154,8 @@ std::vector<BUtilities::Point> BHarvestrGUI::makeEnv (const double attack, const
 	// Release
 	for (int i = 0; i < 10; ++i)
 	{
-		double t = double (i) * 0.1 * release;
-		points.push_back (BUtilities::Point ((attack + decay + 4.0 + t) / size, env.getValue (false, t)));
+		double t = attack + decay + 4.0 + double (i) * 0.1 * release;
+		points.push_back (BUtilities::Point (t / size, env.getValue (t)));
 	}
 
 	points.push_back (BUtilities::Point ((attack + decay + 4.0 + release) / size, 0.0));

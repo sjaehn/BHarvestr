@@ -24,7 +24,9 @@
 #include <cstdint>
 #include "StaticArrayList.hpp"
 #include "Grain.hpp"
+#include "Envelope.hpp"
 #include "definitions.h"
+#include "Ports.hpp"
 
 struct Voice
 {
@@ -33,14 +35,26 @@ struct Voice
         uint64_t startFrame;
         uint64_t patternStartFrame;
         uint64_t endFrame;
-        double endValue;
+        uint64_t releaseFrames;
+
+
+        Envelope envelope[NR_ENVS];
         StaticArrayList<Grain, MAXGRAINS> grains;
 
-        Voice () : Voice (0, 0, 0, 0) {}
-        Voice (const uint8_t note, const uint8_t velocity, const uint64_t startFrame, const uint64_t endFrame) :
-                        note (note), velocity (velocity), startFrame (startFrame),
-                        patternStartFrame (startFrame), endFrame (endFrame),
-                        endValue (0.0), grains () {}
+
+        Voice () : Voice (0, 0, 0, 0, 0,  nullptr) {}
+
+        Voice (const uint8_t note, const uint8_t velocity, const uint64_t startFrame, const uint64_t endFrame, const uint64_t releaseFrames, Envelope* env) :
+        note (note), velocity (velocity), startFrame (startFrame),
+        patternStartFrame (startFrame), endFrame (endFrame),
+        releaseFrames (releaseFrames),
+        grains ()
+        {
+                if (env)
+                {
+                        for (int i = 0; i < NR_ENVS; ++i) envelope[i] = env[i];
+                }
+        }
 
 };
 

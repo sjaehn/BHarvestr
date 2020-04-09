@@ -30,6 +30,8 @@ public:
 
 	MiniMaximizeButton (const double x, const double y, const double width, const double height, const std::string& name, double defaultValue = 0) :
 			ToggleButton (x, y, width, height, name, defaultValue),
+			minPosition_ (x, y),
+			maxPosition_ (x, y),
 			parentMinArea_(),
 			parentMaxArea_() {}
 
@@ -45,6 +47,22 @@ public:
 		if (value) onValueChanged (nullptr);
 	}
 
+	virtual void moveTo (const double x, const double y) override {moveTo (BUtilities::Point (x, y));}
+
+	virtual void moveTo (const BUtilities::Point& position) override
+	{
+		minPosition_ = position;
+		maxPosition_ = position;
+		Widget::moveTo (position);
+	}
+
+	virtual void moveTo (const BUtilities::Point& minPosition, const BUtilities::Point& maxPosition)
+	{
+		minPosition_ = minPosition;
+		maxPosition_ = maxPosition;
+		Widget::moveTo (value ? maxPosition : minPosition);
+	}
+
 	virtual void onValueChanged (BEvents::ValueChangedEvent* event) override
 	{
 		if (parent_)
@@ -52,12 +70,17 @@ public:
 			BUtilities::RectArea area = (value ? parentMaxArea_ : parentMinArea_);
 			parent_->moveTo (area.getPosition());
 			parent_->resize (area.getExtends());
+			parent_->raiseToTop();
 		}
+
+		Widget::moveTo (value ? maxPosition_ : minPosition_);
 
 		if (event) ToggleButton::onValueChanged (event);
 	}
 
 protected:
+	BUtilities::Point minPosition_;
+	BUtilities::Point maxPosition_;
 	BUtilities::RectArea parentMinArea_;
 	BUtilities::RectArea parentMaxArea_;
 

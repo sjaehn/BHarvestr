@@ -38,7 +38,6 @@ BHarvestr::BHarvestr (double samplerate, const LV2_Feature* const* features) :
 	pattern (), sample (nullptr), voices (),
 	lfo {Lfo()},
 	seq {Sequencer<NR_SEQ_STEPS>()},
-	env {Envelope {0.2, 0.2, 0.8, 0.4}},
 	shape {Shape<MAXNODES>()},
 	presetInfo {"", "", 0, "", "", "", ""},
 	rate (samplerate),
@@ -205,29 +204,6 @@ void BHarvestr::run (uint32_t n_samples)
 								break;
 
 						default:	seq[nr].setStep (param - SEQ_STEPS, val);
-					}
-				}
-
-				else if ((i >= ENVS) && (i < ENVS + ENV_SIZE * NR_ENVS))
-				{
-					int nr = (i - ENVS) / ENV_SIZE;
-					int param = (i - ENVS) % ENV_SIZE;
-
-					switch (param)
-					{
-						case ENV_ATTACK:	env[nr].attack = val;
-									break;
-
-						case ENV_DECAY:		env[nr].decay = val;
-									break;
-
-						case ENV_SUSTAIN:	env[nr].sustain = val;
-									break;
-
-						case ENV_RELEASE:	env[nr].release = val;
-									break;
-
-						default:		break;
 					}
 				}
 
@@ -979,7 +955,36 @@ void BHarvestr::noteOn (const uint8_t note, const uint8_t velocity, const uint64
 	// New voice
 	if (newNote && (voices.size < controllers[MAX_VOICES]))
 	{
-		Voice voice = Voice (note, velocity, frame, 0xFFFFFFFF00000000);
+		// Copy envelope data from controllers
+		Envelope env[NR_ENVS];
+		for (int i = 0; i < NR_ENVS; ++i)
+		{
+			env[i] = Envelope
+			(
+				controllers[ENVS + i * ENV_SIZE + ENV_ATTACK],
+				controllers[ENVS + i * ENV_SIZE + ENV_DECAY],
+				controllers[ENVS + i * ENV_SIZE + ENV_SUSTAIN],
+				controllers[ENVS + i * ENV_SIZE + ENV_RELEASE]
+			);
+		}
+
+		// Calculate release frames for each voice
+		uint64_t releaseFrames = secondsToFrames (4.0, rate);
+		for (int i = 0; i < NR_PROPERTY_MODULATORS; ++i)
+		{
+			int modNr = controllers[SYNTH + SYNTH_LEVEL * PROPERTIES_SIZE + PROPERTY_MODULATORS + i];
+			if (modNr == MODULATOR_NONE) break;
+			if ((modNr >= MODULATOR_ENV1) && (modNr <= MODULATOR_ENV4))
+			{
+				int envNr = modNr - MODULATOR_ENV1;
+				double iReleaseSeconds = env[envNr].getRelease();
+				uint64_t iReleaseFrames = secondsToFrames (iReleaseSeconds, rate);
+				if (iReleaseFrames < releaseFrames) releaseFrames = iReleaseFrames;
+			}
+		}
+
+		// Add new voice
+		Voice voice = Voice (note, velocity, frame, 0xFFFFFFFF00000000, releaseFrames, env);
 		voice.grains.push_back (Grain {frame, 0xFFFFFFFF00000000, 0ul, 0l, 0.0, 0.0, 0.0});
 		voices.push_back (voice);
 	}
@@ -992,9 +997,8 @@ void BHarvestr::noteOff (const uint8_t note, const uint64_t frame)
 		if (((**it).note == note) && (frame < (**it).endFrame))
 		{
 			(**it).endFrame = frame;
-			const int envNr = controllers[SYNTH_ENV];
 			const double pos = framesToSeconds (frame - (**it).startFrame, rate);
-			(**it).endValue = env[envNr].getValue (true, pos);
+			for (int i = 0; i < NR_ENVS; ++i) (**it).envelope[i].releaseAt (pos);
 		}
 	}
 }
@@ -1012,9 +1016,8 @@ void BHarvestr::allNotesOff (const uint64_t frame)
 		if (frame < (**it).endFrame)
 		{
 			(**it).endFrame = frame;
-			const int envNr = controllers[SYNTH_ENV];
 			const double pos = framesToSeconds (frame - (**it).startFrame, rate);
-			(**it).endValue = env[envNr].getValue (true, pos);
+			for (int i = 0; i < NR_ENVS; ++i) (**it).envelope[i].releaseAt (pos);
 		}
 	}
 }
@@ -1028,9 +1031,6 @@ void BHarvestr::play (const int start, const int end)
 		memset (&audioOutput2[start], 0, (end - start) * sizeof (float));
 		return;
 	}
-
-	int envNr = controllers[SYNTH_ENV];
-	uint64_t vReleaseFrames = secondsToFrames (env[envNr].release, rate);
 
 	for (int i = start; i < end; ++i)
 	{
@@ -1078,7 +1078,8 @@ void BHarvestr::play (const int start, const int end)
 			float vsample1 = 0.0f;
 			float vsample2 = 0.0f;
 
-			if ((iframe >= voice.startFrame) && (iframe <= voice.endFrame + vReleaseFrames))
+			// Play only active voices
+			if ((iframe >= voice.startFrame) && (iframe <= voice.endFrame + voice.releaseFrames))
 			{
 				// Remove outtimed grains
 				bool done;
@@ -1121,26 +1122,26 @@ void BHarvestr::play (const int start, const int end)
 
 
 					// Set modulated grain properties
-					float graintune = modulateGrainProperty (&voice, GRAIN_TUNE, iframe);
-					float grainfine = modulateGrainProperty (&voice, GRAIN_FINE, iframe);
+					float graintune = getModulation (&voice, PROPERTIES + GRAIN_TUNE * PROPERTIES_SIZE, iframe);
+					float grainfine = getModulation (&voice, PROPERTIES + GRAIN_FINE * PROPERTIES_SIZE, iframe);
 					grain.speed = noteToFrequency(float (voice.note) + graintune + 0.01 * grainfine) / controllers[SAMPLE_FREQ];
 
-					float grainsize = modulateGrainProperty (&voice, GRAIN_SIZE, iframe);
+					float grainsize = getModulation (&voice, PROPERTIES + GRAIN_SIZE * PROPERTIES_SIZE, iframe);
 					grain.endFrame = grain.startFrame + millisecondsToFrames (grainsize, rate) * grain.speed;
 
-					float phase = modulateGrainProperty (&voice, GRAIN_PHASE, iframe);
+					float phase = getModulation (&voice, PROPERTIES + GRAIN_PHASE * PROPERTIES_SIZE, iframe);
 					grain.sampleStartFrame = grainStartFrame + grain.driveFrames - grainsize * phase;
 
-					grain.level = modulateGrainProperty (&voice, GRAIN_LEVEL, iframe);
-					grain.pan = modulateGrainProperty (&voice, GRAIN_PAN, iframe);
+					grain.level = getModulation (&voice, PROPERTIES + GRAIN_LEVEL * PROPERTIES_SIZE, iframe);
+					grain.pan = getModulation (&voice, PROPERTIES + GRAIN_PAN * PROPERTIES_SIZE, iframe);
 
 
 					// Reserve next grain
-					float grainrate = modulateGrainProperty (&voice, GRAIN_RATE, iframe);
+					float grainrate = getModulation (&voice, PROPERTIES + GRAIN_RATE * PROPERTIES_SIZE, iframe);
 					double diffframes = double (grain.endFrame - grain.startFrame) / grainrate;
 					uint64_t nextframe = iframe + diffframes;
 
-					float graindrive = modulateGrainProperty (&voice, GRAIN_DRIVE, iframe);
+					float graindrive = getModulation (&voice, PROPERTIES + GRAIN_DRIVE * PROPERTIES_SIZE, iframe);
 					int64_t nextdriveframes = int64_t (grain.driveFrames + graindrive * diffframes) % grainFrames ;
 
 					voice.grains.push_back(Grain {nextframe , 0xFFFFFFFF00000000, 0ul, nextdriveframes, 0.0, 0.0, 0.0});
@@ -1189,12 +1190,7 @@ void BHarvestr::play (const int start, const int end)
 				}
 
 				// Apply envelope and add to isample
-				float f =
-				(
-					iframe <= voice.endFrame ?
-					env[envNr].getValue (true, framesToSeconds (iframe - voice.startFrame, rate)) * float (voice.velocity) / 127.0 :
-					env[envNr].getValue (false, framesToSeconds (iframe - voice.endFrame, rate), voice.endValue) * float (voice.velocity) / 127.0
-				);
+				float f = getModulation (&voice, SYNTH + SYNTH_LEVEL * PROPERTIES_SIZE, iframe);
 				isample1 += vsample1 * f;
 				isample2 += vsample2 * f;
 			}
@@ -1212,7 +1208,7 @@ void BHarvestr::play (const int start, const int end)
 		done = true;
 		for (Voice** vit = voices.begin (); vit < voices.end(); ++vit)
 		{
-			if ((**vit).endFrame + vReleaseFrames < frame + end)
+			if ((**vit).endFrame + (**vit).releaseFrames < frame + end)
 			{
 				voices.erase (vit);
 				done = false;
@@ -1222,41 +1218,40 @@ void BHarvestr::play (const int start, const int end)
 	} while (!done);
 }
 
-double BHarvestr::modulateGrainProperty (const Voice* voiceptr, const int property, const uint64_t frame) const
+double BHarvestr::getModulation (const Voice* voiceptr, const int property, const uint64_t frame) const
 {
-	float start = controllers[PROPERTIES + property * PROPERTIES_SIZE + PROPERTY_VALUE_START];
-	float end = controllers[PROPERTIES + property * PROPERTIES_SIZE + PROPERTY_VALUE_END];
-	float factor = (controllers[PROPERTIES + property * PROPERTIES_SIZE + PROPERTY_MODULATORS] == 0.0f ? 0.0f : 1.0f);
+	float start = controllers[property + PROPERTY_VALUE_START];
+	float end = controllers[property + PROPERTY_VALUE_END];
+	float factor = (controllers[property + PROPERTY_MODULATORS] == 0.0f ? 0.0f : 1.0f);
 
 	for (int i = 0; i < NR_PROPERTY_MODULATORS; ++i)
 	{
-		int mod = controllers[PROPERTIES + property * PROPERTIES_SIZE + PROPERTY_MODULATORS + i];
+		int mod = controllers[property + PROPERTY_MODULATORS + i];
 		if (mod == 0) break;
 
+		// Envelope
+		if (mod <= MODULATOR_ENV4)
+		{
+			if (voiceptr)
+			{
+				const int nr = mod - MODULATOR_ENV1;
+				if (frame < voiceptr->startFrame) factor = 0.0f;
+				else factor *= voiceptr->envelope[nr].getValue (framesToSeconds (frame - voiceptr->startFrame, rate));
+			}
+		}
+
 		// LFO
-		if (mod < MODULATOR_SEQ1)
+		else if (mod <= MODULATOR_LFO4)
 		{
 			const int nr = mod - MODULATOR_LFO1;
 			factor *= controllers[LFOS + nr * LFO_SIZE + LFO_AMP] * lfo[nr].getValue (framesToSeconds (frame, rate));
 		}
 
 		// Sequencer
-		else if (mod < MODULATOR_ENV1)
+		else if(mod <= MODULATOR_SEQ4)
 		{
 			const int nr = mod - MODULATOR_SEQ1;
 			factor *= seq[nr].getValue (framesToSeconds (frame, rate));
-		}
-
-		// Envelope
-		else if (mod < MODULATOR_RANDOM1)
-		{
-			if (voiceptr)
-			{
-				const int nr = mod - MODULATOR_ENV1;
-				if (frame < voiceptr->startFrame) factor = 0.0f;
-				if (frame < voiceptr->endFrame) factor *= env[nr].getValue (true, framesToSeconds (frame - voiceptr->startFrame, rate));
-				else factor *= env[nr].getValue (false, framesToSeconds (frame, rate), voiceptr->endValue);
-			}
 		}
 
 		// Random
@@ -1321,7 +1316,7 @@ void BHarvestr::notifyStatusToGui ()
 	float grainProperties[NR_GRAIN_PROPERTIES];
 	for (int i = 0; i < NR_GRAIN_PROPERTIES; ++i)
 	{
-		grainProperties[i] = modulateGrainProperty (nullptr, i, frame);
+		grainProperties[i] = getModulation (nullptr, PROPERTIES + i * PROPERTIES_SIZE, frame);
 	}
 
 	lv2_atom_forge_key(&notifyForge, uris.bharvestr_statusGrainProperties);
