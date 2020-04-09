@@ -69,7 +69,7 @@ Click on the file open symbol or the file name to select an audio source file.
 
 #### Step 2 : Select a region
 
-Drag the rulers in the sample window to select a region to use for granular sythesis. It is recommended to
+Drag the rulers in the sample window to select a region to use for granular synthesis. It is recommended to
 exclude the starting and the and region of the sample.
 
 Also assign a note or a frequency to the selected region (default: A4 / 440 Hz).
@@ -87,7 +87,7 @@ Set a modulation range for the grain properties by dragging or scrolling *outsid
 dial. Click on the down button next to the respective dial and select up to four modulators for each property.
 
 You can select between four envelopes, four LFOs, four sequencers, and four random engines. Randomness
-applied to grain properties may also prevent unwanted resonanced produced by symmetricaly overlaying grains.
+applied to grain properties may also prevent unwanted resonance produced by symmetricaly overlaying grains.
 
 Modulation can also be applied to the process properties. Process level needs to be connected to at least
 one envelope modulator (default: Env1).
