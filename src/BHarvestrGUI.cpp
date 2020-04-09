@@ -215,7 +215,7 @@ BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *f
 	}
 
 	// processWidgets
-	processWidgets[SYNTH_LEVEL].rangeDial = RangeDial (570, 390, 60, 60, "dial", 1.0, 0.0, 2.0, 0, "%1.2f");
+	processWidgets[SYNTH_LEVEL].rangeDial = RangeDial (560, 390, 60, 60, "dial", 1.0, 0.0, 2.0, 0, "%1.2f");
 	BItems::ItemList envItemList = BItems::ItemList
 	({
 		{1, "Env1"},
@@ -1164,7 +1164,7 @@ void BHarvestrGUI::resize ()
 
 	for (int i = 0; i < NR_SYNTH_PROPERTIES; ++i)
 	{
-		RESIZE (processWidgets[i].rangeDial, 570 - i * 90, 390, 60, 60, sz);
+		RESIZE (processWidgets[i].rangeDial, 560 - i * 90, 390, 60, 60, sz);
 		processWidgets[i].miniMaxiButton.moveTo ({75 * sz, 5 * sz}, {75 * sz, 200 * sz});
 		processWidgets[i].miniMaxiButton.resize (10 * sz, 10 * sz);
 		processWidgets[i].miniMaxiButton.setParentMinimizeArea ({(540 - i * 90) * sz, 455 * sz, 100 * sz, 20 * sz});
