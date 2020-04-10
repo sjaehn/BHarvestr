@@ -21,6 +21,15 @@
 #include "BHarvestr.hpp"
 #include <ctime>
 
+#define LCG_RAND_MAX 0x7fff
+static unsigned int g_seed;
+inline void lcg_srand (int seed) {g_seed = seed;}
+inline int lcg_rand ()
+{
+    g_seed = (1103515245 * g_seed + 12345);
+    return (g_seed >> 16) & LCG_RAND_MAX;
+}
+
 inline double framesToSeconds (const uint64_t frame, const double rate) {return (double (frame)) / rate;}
 inline double framesToMilliseconds (const uint64_t frame, const double rate) {return 1000.0 * (double (frame)) / rate;}
 inline uint64_t secondsToFrames (const double s, const double rate) {return rate * s;}
@@ -96,7 +105,7 @@ BHarvestr::BHarvestr (double samplerate, const LV2_Feature* const* features) :
 	shape[TRAPEZ_SHAPE].insertNode ({POINT_NODE, {0.75, 1.0}, {0.0, 0.0}, {0.0, 0.0}});
 
 	// Init random engine
-	srand (time (0));
+	lcg_srand (time (0));
 
 	ui_on = false;
 }
@@ -1075,12 +1084,14 @@ void BHarvestr::play (const int start, const int end)
 		for (size_t v = 0; v < voices.size; ++v)
 		{
 			Voice& voice = voices[v];
-			float vsample1 = 0.0f;
-			float vsample2 = 0.0f;
 
 			// Play only active voices
 			if ((iframe >= voice.startFrame) && (iframe <= voice.endFrame + voice.releaseFrames))
 			{
+
+				float vsample1 = 0.0f;
+				float vsample2 = 0.0f;
+
 				// Remove outtimed grains
 				bool done;
 				do
@@ -1175,12 +1186,12 @@ void BHarvestr::play (const int start, const int end)
 							float s1 = sample->data[(p0 + 1) * sample->info.channels];
 							float psample = s0 + (s1 - s0) * pfrac;
 							// Apply shape
-							psample *= shape[int (controllers[GRAIN_SHAPE])].getMapValue (relpos);
+							psample *= shape[int (controllers[GRAIN_SHAPE])].getMapRawValue (relpos);
 							// Set level
 							psample *= grain.level;
 							// Set panning
 							float psample1 = psample * (grain.pan < 0 ? grain.pan + 1 : 1);
-							float psample2 = psample * (grain.pan < 0 ? 1: 1 - grain.pan);
+							float psample2 = psample * (grain.pan < 0 ? 1 : 1 - grain.pan);
 
 							// Add to vsample
 							vsample1 += psample1;
@@ -1248,7 +1259,7 @@ double BHarvestr::getModulation (const Voice* voiceptr, const int property, cons
 		}
 
 		// Sequencer
-		else if(mod <= MODULATOR_SEQ4)
+		else if (mod <= MODULATOR_SEQ4)
 		{
 			const int nr = mod - MODULATOR_SEQ1;
 			factor *= seq[nr].getValue (framesToSeconds (frame, rate));
@@ -1258,7 +1269,7 @@ double BHarvestr::getModulation (const Voice* voiceptr, const int property, cons
 		else
 		{
 			const int nr = mod - MODULATOR_RANDOM1;
-			const double rnd = double (rand()) / double (RAND_MAX);
+			const double rnd = double (lcg_rand()) / double (LCG_RAND_MAX);
 			factor *= controllers[RNDS + nr * RND_SIZE + RND_MIN] + rnd * (controllers[RNDS + nr * RND_SIZE + RND_MAX] - controllers[RNDS + nr * RND_SIZE + RND_MIN]);
 		}
 	}
