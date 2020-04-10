@@ -48,8 +48,8 @@ to run it stand-alone and connect it to the JACK system.
 
 In contrast to standard synthesis methods which are based on oscillating waves, granular synthesis
 uses micro fragments of audio samples to generate sound. Thus, granular synthesis uses the same concept
-as (the majority of) pitch shifters. Granular synthesiziers typically generate lots of overlapping
-grains to produce athmospheric sound effects, full soundscapes and pad sounds.
+as (the majority of) pitch shifters. Granular synthesizers typically generate lots of overlapping
+grains to produce atmospheric sound effects, full soundscapes and pad sounds.
 
 Starting point for granular synthesis is a sample. In theory, any kind of sample can be used. The sample
 is typically chopped by the granular synthesizer into fragments of 1 to 100 ms or sometimes even longer.
@@ -87,7 +87,7 @@ Set a modulation range for the grain properties by dragging or scrolling *outsid
 dial. Click on the down button next to the respective dial and select up to four modulators for each property.
 
 You can select between four envelopes, four LFOs, four sequencers, and four random engines. Randomness
-applied to grain properties may also prevent unwanted resonance produced by symmetricaly overlaying grains.
+applied to grain properties may also prevent unwanted resonance produced by symmetrically overlaying grains.
 
 Modulation can also be applied to the process properties. Process level needs to be connected to at least
 one envelope modulator (default: Env1).
