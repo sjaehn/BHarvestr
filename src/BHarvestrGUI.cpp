@@ -453,6 +453,7 @@ BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *f
 
 	for (int i = 0; i < NR_SYNTH_PROPERTIES; ++i)
 	{
+		processWidgets[i].rangeDial.setMergeable (BEvents::VALUE_CHANGED_EVENT, true);
 		processWidgets[i].miniMaxiButton.setParentMinimizeArea ({540.0 - i * 90.0, 455, 100, 20});
 		processWidgets[i].miniMaxiButton.setParentMaximizeArea ({540.0 - i * 90.0, 260, 100, 215});
 		processWidgets[i].miniMaxiButton.moveTo ({75, 5}, {75, 200});

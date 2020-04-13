@@ -144,7 +144,8 @@ void Window::addEventToQueue (BEvents::Event* event)
 				(eventType == BEvents::EXPOSE_REQUEST_EVENT) ||
 				(eventType == BEvents::POINTER_MOTION_EVENT) ||
 				(eventType == BEvents::POINTER_DRAG_EVENT) ||
-				(eventType == BEvents::WHEEL_SCROLL_EVENT)
+				(eventType == BEvents::WHEEL_SCROLL_EVENT) ||
+				(eventType == BEvents::VALUE_CHANGED_EVENT)
 			)
 		)
 		{
@@ -218,6 +219,17 @@ void Window::addEventToQueue (BEvents::Event* event)
 							delete event;
 							return;
 						}
+					}
+
+					// VALUE_CHANGED_EVENT
+					else if (eventType == BEvents::VALUE_CHANGED_EVENT)
+					{
+						BEvents::ValueChangedEvent* firstEvent = (BEvents::ValueChangedEvent*) precursor;
+						BEvents::ValueChangedEvent* nextEvent = (BEvents::ValueChangedEvent*) event;
+
+						firstEvent->setValue (nextEvent->getValue());
+						delete event;
+						return;
 					}
 				}
 			}
