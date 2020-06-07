@@ -20,6 +20,7 @@
 
 #include "BHarvestr.hpp"
 #include <ctime>
+#include <stdexcept>
 
 #define LCG_RAND_MAX 0x7fff
 static unsigned int g_seed;
