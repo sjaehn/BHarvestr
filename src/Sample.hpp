@@ -27,6 +27,12 @@
 #include <string>
 #include <stdexcept>
 
+#ifndef SF_FORMAT_MP3
+#define MINIMP3_IMPLEMENTATION
+#define MINIMP3_FLOAT_OUTPUT
+#include "minimp3_ex.h"
+#endif /* SF_FORMAT_MP3 */
+
 
 struct Sample
 {
@@ -38,27 +44,61 @@ struct Sample
 
         Sample (const char* samplepath) : info {0, 0, 0, 0, 0, 0}, data (nullptr), path (nullptr)
         {
-        	if (!samplepath) return;
-
-        	SNDFILE* const sndfile = sf_open (samplepath, SFM_READ, &info);
-
-                if (!sndfile || !info.frames) throw std::invalid_argument("Can't open " + std::string(samplepath) + ".");
-
-                // Read & render data
-                data = (float*) malloc (sizeof(float) * info.frames * info.channels);
-                if (!data)
-        	{
-        		sf_close (sndfile);
-        		throw std::bad_alloc();
-        	}
-
-                sf_seek (sndfile, 0, SEEK_SET);
-                sf_read_float (sndfile, data, info.frames * info.channels);
-                sf_close (sndfile);
+                if (!samplepath) return;
 
         	int len = strlen (samplepath);
                 path = (char*) malloc (len + 1);
-                if (path) memcpy(path, samplepath, len + 1);
+                if (!path) throw std::bad_alloc();
+                memcpy (path, samplepath, len + 1);
+
+                // Extract file extension
+                char* extptr = strrchr (path, '.');
+                const int extsz = (extptr ? strlen (extptr) + 1 : 1);
+                char* ext = (char*) malloc (extsz);
+                if (!ext) throw std::bad_alloc();
+                ext[0] = 0;
+                if (extsz > 1) memcpy (ext, extptr, extsz);
+                for (char* s = ext; *s; ++s) *s = tolower ((unsigned char)*s);
+
+
+                // Check for known non-sndfiles
+#ifdef MINIMP3_IMPLEMENTATION
+                if (!strcmp (ext, ".mp3"))
+                {
+                        mp3dec_t mp3dec;
+                        mp3dec_file_info_t mp3info;
+                        if (mp3dec_load (&mp3dec, path, &mp3info, NULL, NULL)) throw std::invalid_argument ("Can't open " + std::string (path) + ".");
+
+                        info.samplerate = mp3info.hz;
+                        info.channels = mp3info.channels;
+                        info.frames = mp3info.samples / mp3info.channels;
+
+                        data = (float*) malloc (sizeof(float) * info.frames * info.channels);
+                        if (!data) throw std::bad_alloc();
+
+                        memcpy (data, mp3info.buffer, sizeof(float) * info.frames * info.channels);
+                }
+
+                else
+#endif /* MINIMP3_IMPLEMENTATION */
+
+        	{
+                        SNDFILE* sndfile = sf_open (samplepath, SFM_READ, &info);
+
+                        if (!sndfile || !info.frames) throw std::invalid_argument ("Can't open " + std::string (path) + ".");
+
+                        // Read & render data
+                        data = (float*) malloc (sizeof(float) * info.frames * info.channels);
+                        if (!data)
+                	{
+                		sf_close (sndfile);
+                		throw std::bad_alloc();
+                	}
+
+                        sf_seek (sndfile, 0, SEEK_SET);
+                        sf_read_float (sndfile, data, info.frames * info.channels);
+                        sf_close (sndfile);
+                }
         }
 
         ~Sample()
