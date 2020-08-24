@@ -38,6 +38,7 @@
 #include "BWidgets/ImageIcon.hpp"
 #include "BWidgets/HPianoRoll.hpp"
 #include "BWidgets/FileChooser.hpp"
+#include "BWidgets/MessageBox.hpp"
 #include "screen.h"
 
 
@@ -143,6 +144,8 @@ private:
 
 	//Widgets
 	BWidgets::Widget mContainer;
+
+	BWidgets::MessageBox mBox;
 
 	BWidgets::Widget globalContainer;
 	BWidgets::ImageIcon globalTitleIcon;

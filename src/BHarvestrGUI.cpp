@@ -21,7 +21,6 @@
 #include "BHarvestrGUI.hpp"
 #include <ctime>
 #include "BUtilities/to_string.hpp"
-#include "MessageDefinitions.hpp"
 #include "Envelope.hpp"
 
 BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *features, PuglNativeWindow parentWindow) :
@@ -973,14 +972,17 @@ void BHarvestrGUI::port_event(uint32_t port, uint32_t buffer_size,
 				}
 			}
 
-			// TODO Message notification
+			// Message notification
 			else if (obj->body.otype == uris.bharvestr_messageEvent)
 			{
 				const LV2_Atom* data = NULL;
 				lv2_atom_object_get(obj, uris.bharvestr_message, &data, 0);
 				if (data && (data->type == uris.atom_String))
 				{
-
+					const std::string msg = (const char*)LV2_ATOM_BODY_CONST (data);
+					mBox = BWidgets::MessageBox (200 * sz, 200 * sz, 400 * sz, 120 * sz, "boxlabel", "Error", msg);
+					mBox.applyTheme (theme);
+					add (mBox);
 				}
 			}
 		}
@@ -1041,6 +1043,8 @@ void BHarvestrGUI::resize ()
 
 	//Scale widgets
 	RESIZE (mContainer, 0, 0, 1440, 880, sz);
+
+	RESIZE (mBox, 200, 200, 400, 120, sz);
 
 	//RESIZE (globalContainer, 20, 110, 360, 90, sz);
 	RESIZE (globalTitleIcon, 100, 0, 160, 20, sz);
@@ -1222,6 +1226,8 @@ void BHarvestrGUI::resize ()
 void BHarvestrGUI::applyTheme (BStyles::Theme& theme)
 {
 	mContainer.applyTheme (theme);
+
+	mBox.applyTheme (theme);
 
 	globalContainer.applyTheme (theme);
 	globalTitleIcon.applyTheme (theme);

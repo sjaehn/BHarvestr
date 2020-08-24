@@ -70,6 +70,7 @@ B_FILES = $(addprefix $(BUNDLE)/, $(ROOTFILES) $(INCFILES))
 GUI_INCL = \
 	src/ValueSelect.cpp \
 	src/ShapeWidget.cpp \
+	src/BWidgets/MessageBox.cpp \
 	src/BWidgets/FileChooser.cpp \
 	src/BWidgets/HPianoRoll.cpp \
 	src/BWidgets/PianoWidget.cpp \
