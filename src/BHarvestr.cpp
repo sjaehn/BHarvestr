@@ -21,6 +21,7 @@
 #include "BHarvestr.hpp"
 #include <ctime>
 #include <stdexcept>
+#include "BUtilities/stof.hpp"
 
 #define LCG_RAND_MAX 0x7fff
 static unsigned int g_seed;
@@ -715,7 +716,7 @@ LV2_State_Status BHarvestr::state_restore (LV2_State_Retrieve_Function retrieve,
 				break;
 			}
 			int val;
-			try {val = std::stof (str, &nextPos);}
+			try {val = BUtilities::stof (str, &nextPos);}
 			catch  (const std::exception& e)
 			{
 				fprintf (stderr, "BHarvestr.lv2: Restore pattern incomplete. Can't parse step %i from \"%s...\"", step, str.substr (0, 63).c_str());
@@ -759,7 +760,7 @@ LV2_State_Status BHarvestr::state_restore (LV2_State_Retrieve_Function retrieve,
 			shapesDataString.erase (0, strPos + 4);
 
 			int sh;
-			try {sh = std::stof (shapesDataString, &nextPos);}
+			try {sh = BUtilities::stof (shapesDataString, &nextPos);}
 			catch  (const std::exception& e)
 			{
 				fprintf (stderr, "BHarvestr.lv2: Restore shape state incomplete. Can't parse shape number from \"%s...\"", shapesDataString.substr (0, 63).c_str());
@@ -787,7 +788,7 @@ LV2_State_Status BHarvestr::state_restore (LV2_State_Retrieve_Function retrieve,
 				}
 				if (strPos > 0) shapesDataString.erase (0, strPos + 4);
 				float val;
-				try {val = std::stof (shapesDataString, &nextPos);}
+				try {val = BUtilities::stof (shapesDataString, &nextPos);}
 				catch  (const std::exception& e)
 				{
 					fprintf (stderr, "Harvestr.lv2: Restore shape state incomplete. Can't parse %s from \"%s...\"",
