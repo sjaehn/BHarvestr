@@ -456,7 +456,7 @@ BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *f
 		processWidgets[i].miniMaxiButton.setParentMinimizeArea ({540.0 - i * 90.0, 455, 100, 20});
 		processWidgets[i].miniMaxiButton.setParentMaximizeArea ({540.0 - i * 90.0, 260, 100, 215});
 		processWidgets[i].miniMaxiButton.moveTo ({75, 5}, {75, 200});
-		processWidgets[i].modContainer.setOversize (true);
+		processWidgets[i].modContainer.setStacking (BWidgets::STACKING_OVERSIZE);
 	}
 
 	shapeToolButtons[POINT_NODE_TOOL - 1].setValue (1.0);
@@ -482,7 +482,7 @@ BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *f
 	{
 		grainWidgets[i].miniMaxiButton.setParentMinimizeArea ({-10.0 + (i % 4) * 90.0, 95.0 + int (i / 4) * 90.0, 100, 20});
 		grainWidgets[i].miniMaxiButton.setParentMaximizeArea ({-10.0 + (i % 4) * 90.0, 95.0 + int (i / 4) * 90.0, 100, 185});
-		grainWidgets[i].modContainer.setOversize (true);
+		grainWidgets[i].modContainer.setStacking (BWidgets::STACKING_OVERSIZE);
 	}
 
 	// Load background & apply theme
