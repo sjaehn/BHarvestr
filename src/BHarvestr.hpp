@@ -58,7 +58,9 @@ class BHarvestr
 public:
 	BHarvestr (double samplerate, const LV2_Feature* const* features);
 	void connect_port(uint32_t port, void *data);
+	void activate();
 	void run(uint32_t n_samples);
+	void deactivate();
 	LV2_State_Status state_save(LV2_State_Store_Function store, LV2_State_Handle handle, uint32_t flags, const LV2_Feature* const* features);
 	LV2_State_Status state_restore(LV2_State_Retrieve_Function retrieve, LV2_State_Handle handle, uint32_t flags, const LV2_Feature* const* features);
 	LV2_Worker_Status work (LV2_Worker_Respond_Function respond, LV2_Worker_Respond_Handle handle, uint32_t size, const void* data);
@@ -73,6 +75,7 @@ private:
 	void allNotesOff (const uint64_t frame);
 	void play (const int start, const int end);
 	double getModulation (const Voice* voiceptr, const int property, const uint64_t frame) const;
+	LV2_Atom_Forge_Ref forgeSamplePath (LV2_Atom_Forge* forge, LV2_Atom_Forge_Frame* frame, const char* path);
 	void notifyStatusToGui();
 	void notifySampleStopToGui();
 	void notifySelectionStopToGui();
@@ -323,6 +326,7 @@ private:
 	};
 
 	bool ui_on;
+	bool activated;
 	Notify notify;
 	char message[256];
 };

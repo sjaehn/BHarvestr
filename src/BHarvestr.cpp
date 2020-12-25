@@ -22,6 +22,7 @@
 #include <ctime>
 #include <stdexcept>
 #include "BUtilities/stof.hpp"
+#include "lv2/core/lv2_util.h"
 
 #define LCG_RAND_MAX 0x7fff
 static unsigned int g_seed;
@@ -55,6 +56,7 @@ BHarvestr::BHarvestr (double samplerate, const LV2_Feature* const* features) :
 	frame (0),
 	sampleFrame (0xFFFFFFFFFFFFFFFF), sampleSelectionFrame (0xFFFFFFFFFFFFFFFF),
 	ui_on (false),
+        activated (false),
 	notify {false, false, false, false, false, false, {false}, false, false},
 	message ("")
 
@@ -133,6 +135,10 @@ void BHarvestr::connect_port (uint32_t port, void *data)
 			if ((port >= CONTROLLERS) && (port < CONTROLLERS + MAXCONTROLLERS)) new_controllers[port - CONTROLLERS] = (float*) data;
 	}
 }
+
+void BHarvestr::activate() {activated = true;}
+
+void BHarvestr::deactivate() {activated = false;}
 
 void BHarvestr::run (uint32_t n_samples)
 {
@@ -592,7 +598,7 @@ LV2_State_Status BHarvestr::state_save (LV2_State_Store_Function store, LV2_Stat
 					node.handle2.x,
 					node.handle2.y
 				);
-				if ((sh < USER_SHAPES + NR_USER_SHAPES - 1) || nd < shape[sh].size ()) strcat (valueString, ";\n");
+				if ((sh < USER_SHAPES + NR_USER_SHAPES - 1) || (nd < shape[sh].size ())) strcat (valueString, ";\n");
 				else strcat(valueString, "\n");
 				strcat (shapesDataString, valueString);
 			}
@@ -606,22 +612,64 @@ LV2_State_Status BHarvestr::state_save (LV2_State_Store_Function store, LV2_Stat
 LV2_State_Status BHarvestr::state_restore (LV2_State_Retrieve_Function retrieve, LV2_State_Handle handle, uint32_t flags,
 			const LV2_Feature* const* features)
 {
+        // Get host features
+	LV2_Worker_Schedule* schedule = nullptr;
+	LV2_State_Map_Path* mapPath = nullptr;
+	const char* missing  = lv2_features_query
+	(
+		features,
+		LV2_STATE__mapPath, &mapPath, true,
+		LV2_WORKER__schedule, &schedule, false,
+		nullptr
+	);
+
+	if (missing)
+	{
+		fprintf (stderr, "BJumblr.lv2: Host doesn't support required features.\n");
+		return LV2_STATE_ERR_NO_FEATURE;
+	}
+
 	size_t   size;
 	uint32_t type;
 	uint32_t valflags;
 
-	// Retireve sample path
-	const void* pathData = retrieve (handle, uris.bharvestr_samplePath, &size, &type, &valflags);
-        if (pathData)
+        // Retireve sample data
 	{
-		const char* path = (const char*)pathData;
-		Sample* s = loadSample (path);
-		if (s)
+		char samplePath[PATH_MAX] = {0};
+
+		const void* pathData = retrieve (handle, uris.bharvestr_samplePath, &size, &type, &valflags);
+		if (pathData)
 		{
-			if (sample) delete sample;
-			installSample (s);
+			const char* absPath  = mapPath->absolute_path (mapPath->handle, (char*)pathData);
+		        if (absPath)
+			{
+				if (strlen (absPath) < PATH_MAX) strcpy (samplePath, absPath);
+				else fprintf (stderr, "BHarvestr.lv2: Sample path too long.\n");
+		        }
 		}
-        }
+
+		if (activated && schedule)
+		{
+			LV2_Atom_Forge forge;
+			lv2_atom_forge_init(&forge, map);
+			uint8_t buf[1200];
+			lv2_atom_forge_set_buffer(&forge, buf, sizeof(buf));
+			LV2_Atom_Forge_Frame frame;
+			LV2_Atom* msg = (LV2_Atom*)forgeSamplePath (&forge, &frame, samplePath);
+			lv2_atom_forge_pop(&forge, &frame);
+			if (msg) schedule->schedule_work(schedule->handle, lv2_atom_total_size(msg), msg);
+		}
+
+		else
+		{
+                        Sample* s = loadSample (samplePath);
+        		if (s)
+        		{
+        			if (sample) delete sample;
+        			installSample (s);
+        		}
+		}
+	}
 
 	// Retrieve preset data
 	const void* presetNameData = retrieve (handle, uris.bharvestr_presetInfoName, &size, &type, &valflags);
@@ -1352,6 +1400,17 @@ void BHarvestr::notifyStatusToGui ()
 	lv2_atom_forge_pop(&notifyForge, &forgeframe);
 }
 
+LV2_Atom_Forge_Ref BHarvestr::forgeSamplePath (LV2_Atom_Forge* forge, LV2_Atom_Forge_Frame* frame, const char* path)
+{
+	const LV2_Atom_Forge_Ref msg = lv2_atom_forge_object (forge, frame, 0, uris.bharvestr_sampleEvent);
+	if (msg)
+	{
+		lv2_atom_forge_key (forge, uris.bharvestr_samplePath);
+		lv2_atom_forge_path (forge, path, strlen (path) + 1);
+	}
+	return msg;
+}
+
 void BHarvestr::notifySampleStopToGui ()
 {
 	LV2_Atom_Forge_Frame forgeframe;
@@ -1396,10 +1455,7 @@ void BHarvestr::notifySamplePathToGui ()
 	{
 		LV2_Atom_Forge_Frame frame;
 		lv2_atom_forge_frame_time(&notifyForge, 0);
-		lv2_atom_forge_object(&notifyForge, &frame, 0, uris.bharvestr_sampleEvent);
-		lv2_atom_forge_key(&notifyForge, uris.bharvestr_samplePath);
-		lv2_atom_forge_path (&notifyForge, sample->path, strlen (sample->path) + 1);
-
+		forgeSamplePath(&notifyForge, &frame, sample->path);
 		lv2_atom_forge_pop(&notifyForge, &frame);
 	}
 
@@ -1553,10 +1609,22 @@ static void connect_port (LV2_Handle instance, uint32_t port, void *data)
 	inst->connect_port (port, data);
 }
 
+void activate (LV2_Handle instance)
+{
+	BHarvestr* inst = (BHarvestr*) instance;
+	if (inst) inst->activate();
+}
+
 static void run (LV2_Handle instance, uint32_t n_samples)
 {
 	BHarvestr* inst = (BHarvestr*) instance;
 	if (inst) inst->run (n_samples);
+}
+
+void deactivate (LV2_Handle instance)
+{
+	BHarvestr* inst = (BHarvestr*) instance;
+	if (inst) inst->deactivate();
 }
 
 static LV2_State_Status state_save(LV2_Handle instance, LV2_State_Store_Function store, LV2_State_Handle handle, uint32_t flags,
@@ -1616,9 +1684,9 @@ static const LV2_Descriptor descriptor =
 		BHARVESTR_URI,
 		instantiate,
 		connect_port,
-		NULL,	// activate
+		activate,
 		run,
-		NULL,	// deactivate
+		deactivate,
 		cleanup,
 		extension_data
 };
