@@ -24,7 +24,7 @@
 #include "Envelope.hpp"
 
 BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *features, PuglNativeWindow parentWindow) :
-	Window (1440, 880, "B.Harvestr", parentWindow, true),
+	Window (1440, 880, "B.Harvestr", parentWindow, true, PUGL_MODULE, 0),
 	controller (NULL), write_function (NULL),
 	pluginPath (bundle_path ? std::string (bundle_path) : std::string ("")),
 	sz (1.0), bgImageSurface (nullptr),
