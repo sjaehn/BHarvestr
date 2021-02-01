@@ -268,7 +268,7 @@ protected:
 							cairo_pattern_add_color_stop_rgba (pat, 0.0, CAIRO_RGBA (illuminated));
 							cairo_pattern_add_color_stop_rgba (pat, 1.0, CAIRO_RGBA (darkened));
 
-							cairo_rectangle_rounded (cr, x, y, padw, padh, padrd);
+							cairo_rectangle_rounded (cr, x, y, padw, padh, padrd, 0b1111);
 							cairo_set_source (cr, pat);
 							cairo_fill (cr);
 							cairo_pattern_destroy (pat);
