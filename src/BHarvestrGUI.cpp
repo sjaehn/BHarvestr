@@ -23,7 +23,7 @@
 #include "BUtilities/to_string.hpp"
 #include "Envelope.hpp"
 
-BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *features, PuglNativeWindow parentWindow) :
+BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *features, PuglNativeView parentWindow) :
 	Window (1440, 880, "B.Harvestr", parentWindow, true, PUGL_MODULE, 0),
 	controller (NULL), write_function (NULL),
 	pluginPath (bundle_path ? std::string (bundle_path) : std::string ("")),
@@ -2195,7 +2195,7 @@ LV2UI_Handle instantiate (const LV2UI_Descriptor *descriptor,
 						  LV2UI_Widget *widget,
 						  const LV2_Feature *const *features)
 {
-	PuglNativeWindow parentWindow = 0;
+	PuglNativeView parentWindow = 0;
 	LV2UI_Resize* resize = NULL;
 
 	if (strcmp(plugin_uri, BHARVESTR_URI) != 0)
@@ -2206,7 +2206,7 @@ LV2UI_Handle instantiate (const LV2UI_Descriptor *descriptor,
 
 	for (int i = 0; features[i]; ++i)
 	{
-		if (!strcmp(features[i]->URI, LV2_UI__parent)) parentWindow = (PuglNativeWindow) features[i]->data;
+		if (!strcmp(features[i]->URI, LV2_UI__parent)) parentWindow = (PuglNativeView) features[i]->data;
 		else if (!strcmp(features[i]->URI, LV2_UI__resize)) resize = (LV2UI_Resize*)features[i]->data;
 	}
 	if (parentWindow == 0) std::cerr << "BHarvestr.lv2#GUI: No parent window.\n";
@@ -2267,8 +2267,8 @@ static int call_resize (LV2UI_Handle ui, int width, int height)
 	return 0;
 }
 
-static const LV2UI_Idle_Interface idle = {.idle = call_idle };
-static const LV2UI_Resize resize = {.ui_resize = call_resize} ;
+static const LV2UI_Idle_Interface idle = {call_idle};
+static const LV2UI_Resize resize = {nullptr, call_resize} ;
 
 static const void* extension_data(const char* uri)
 {

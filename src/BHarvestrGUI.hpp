@@ -89,7 +89,7 @@ const std::string toolLabels[NR_TOOLS - 1] = {"Select", "Point node", "Auto smoo
 class BHarvestrGUI : public BWidgets::Window
 {
 public:
-	BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *features, PuglNativeWindow parentWindow);
+	BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *features, PuglNativeView parentWindow);
 	~BHarvestrGUI ();
 	void port_event (uint32_t port_index, uint32_t buffer_size, uint32_t format, const void *buffer);
 	void sendUiStatus (const bool on);
