@@ -2187,7 +2187,7 @@ void BHarvestrGUI::updateSelection ()
 	sampleSelectionSizeLabel.setText ("Selection: " + BUtilities::to_string (selectionSize / 1000.0f, "%5.2f s"));
 }
 
-LV2UI_Handle instantiate (const LV2UI_Descriptor *descriptor,
+static LV2UI_Handle instantiate (const LV2UI_Descriptor *descriptor,
 						  const char *plugin_uri,
 						  const char *bundle_path,
 						  LV2UI_Write_Function write_function,
@@ -2239,13 +2239,13 @@ LV2UI_Handle instantiate (const LV2UI_Descriptor *descriptor,
 	return (LV2UI_Handle) ui;
 }
 
-void cleanup(LV2UI_Handle ui)
+static void cleanup(LV2UI_Handle ui)
 {
 	BHarvestrGUI* self = (BHarvestrGUI*) ui;
 	delete self;
 }
 
-void port_event(LV2UI_Handle ui, uint32_t port_index, uint32_t buffer_size,
+static void port_event(LV2UI_Handle ui, uint32_t port_index, uint32_t buffer_size,
 	uint32_t format, const void* buffer)
 {
 	BHarvestrGUI* self = (BHarvestrGUI*) ui;

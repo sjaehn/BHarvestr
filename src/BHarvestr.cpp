@@ -1609,7 +1609,7 @@ static void connect_port (LV2_Handle instance, uint32_t port, void *data)
 	inst->connect_port (port, data);
 }
 
-void activate (LV2_Handle instance)
+static void activate (LV2_Handle instance)
 {
 	BHarvestr* inst = (BHarvestr*) instance;
 	if (inst) inst->activate();
@@ -1621,7 +1621,7 @@ static void run (LV2_Handle instance, uint32_t n_samples)
 	if (inst) inst->run (n_samples);
 }
 
-void deactivate (LV2_Handle instance)
+static void deactivate (LV2_Handle instance)
 {
 	BHarvestr* inst = (BHarvestr*) instance;
 	if (inst) inst->deactivate();
