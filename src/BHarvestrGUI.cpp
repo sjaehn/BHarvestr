@@ -2277,7 +2277,7 @@ static const void* extension_data(const char* uri)
 	else return NULL;
 }
 
-const LV2UI_Descriptor guiDescriptor = {
+static const LV2UI_Descriptor guiDescriptor = {
 		BHARVESTR_GUI_URI,
 		instantiate,
 		cleanup,
