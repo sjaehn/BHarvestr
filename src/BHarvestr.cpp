@@ -22,7 +22,6 @@
 #include <ctime>
 #include <stdexcept>
 #include "BUtilities/stof.hpp"
-#include "lv2/core/lv2_util.h"
 
 #define LCG_RAND_MAX 0x7fff
 static unsigned int g_seed;
@@ -529,6 +528,18 @@ LV2_State_Status BHarvestr::state_save (LV2_State_Store_Function store, LV2_Stat
 		}
 	}
 
+#ifdef LV2_STATE__freePath
+        LV2_State_Free_Path* freePath = NULL;
+	for (int i = 0; features[i]; ++i)
+	{
+		if (strcmp(features[i]->URI, LV2_STATE__freePath) == 0)
+		{
+			freePath = (LV2_State_Free_Path*) features[i]->data;
+			break;
+		}
+	}
+#endif
+
 	if (!map_path)
 	{
 		fprintf (stderr, "BHarvestr.lv2: Feature map_path not available! Can't save plugin status!\n" );
@@ -539,8 +550,18 @@ LV2_State_Status BHarvestr::state_save (LV2_State_Store_Function store, LV2_Stat
 	if (sample && sample->path)
 	{
 		char* abstrPath = map_path->abstract_path(map_path->handle, sample->path);
-		store(handle, uris.bharvestr_samplePath, abstrPath, strlen (sample->path) + 1, uris.atom_Path, LV2_STATE_IS_POD | LV2_STATE_IS_PORTABLE);
-		free (abstrPath);
+                if (abstrPath)
+                {
+        		store(handle, uris.bharvestr_samplePath, abstrPath, strlen (sample->path) + 1, uris.atom_Path, LV2_STATE_IS_POD | LV2_STATE_IS_PORTABLE);
+
+#ifdef LV2_STATE__freePath
+        		if (freePath) freePath->free_path (freePath->handle, abstrPath);
+        		else
+#endif
+        		{
+        			free (abstrPath);
+        		}
+                }
 	}
 
 	// Save preset data
@@ -615,17 +636,42 @@ LV2_State_Status BHarvestr::state_restore (LV2_State_Retrieve_Function retrieve,
         // Get host features
 	LV2_Worker_Schedule* schedule = nullptr;
 	LV2_State_Map_Path* mapPath = nullptr;
-	const char* missing  = lv2_features_query
-	(
-		features,
-		LV2_STATE__mapPath, &mapPath, true,
-		LV2_WORKER__schedule, &schedule, false,
-		nullptr
-	);
+#ifdef LV2_STATE__freePath
+	LV2_State_Free_Path* freePath = nullptr;
+#endif
 
-	if (missing)
+	for (int i = 0; features[i]; ++i)
 	{
-		fprintf (stderr, "BJumblr.lv2: Host doesn't support required features.\n");
+		if (strcmp(features[i]->URI, LV2_STATE__mapPath) == 0)
+		{
+			mapPath = (LV2_State_Map_Path*) features[i]->data;
+			break;
+		}
+	}
+
+	for (int i = 0; features[i]; ++i)
+	{
+		if (strcmp(features[i]->URI, LV2_WORKER__schedule) == 0)
+		{
+			schedule = (LV2_Worker_Schedule*) features[i]->data;
+			break;
+		}
+	}
+
+#ifdef LV2_STATE__freePath
+	for (int i = 0; features[i]; ++i)
+	{
+		if (strcmp(features[i]->URI, LV2_STATE__freePath) == 0)
+		{
+			freePath = (LV2_State_Free_Path*) features[i]->data;
+			break;
+		}
+	}
+#endif
+
+	if (!mapPath)
+	{
+		fprintf (stderr, "BHarvestr.lv2: Host doesn't support required features.\n");
 		return LV2_STATE_ERR_NO_FEATURE;
 	}
 
@@ -640,12 +686,25 @@ LV2_State_Status BHarvestr::state_restore (LV2_State_Retrieve_Function retrieve,
 		const void* pathData = retrieve (handle, uris.bharvestr_samplePath, &size, &type, &valflags);
 		if (pathData)
 		{
-			const char* absPath  = mapPath->absolute_path (mapPath->handle, (char*)pathData);
-		        if (absPath)
-			{
-				if (strlen (absPath) < PATH_MAX) strcpy (samplePath, absPath);
-				else fprintf (stderr, "BHarvestr.lv2: Sample path too long.\n");
-		        }
+                        char* absPath = mapPath->absolute_path (mapPath->handle, (char*)pathData);
+        	        if (absPath)
+        		{
+        			if (strlen (absPath) < PATH_MAX) strcpy (samplePath, absPath);
+        			else
+        			{
+        				fprintf (stderr, "BHarvestr.lv2: Sample path too long.\n");
+        			}
+
+        			fprintf(stderr, "BHarvestr.lv2: Restore abs_path:%s\n", absPath);
+
+#ifdef LV2_STATE__freePath
+        			if (freePath) freePath->free_path (freePath->handle, absPath);
+        			else
+#endif
+        			{
+        				free (absPath);
+        			}
+        	        }
 		}
 
 		if (activated && schedule)
