@@ -1665,7 +1665,7 @@ static LV2_Handle instantiate (const LV2_Descriptor* descriptor, double samplera
 static void connect_port (LV2_Handle instance, uint32_t port, void *data)
 {
 	BHarvestr* inst = (BHarvestr*) instance;
-	inst->connect_port (port, data);
+	if (inst) inst->connect_port (port, data);
 }
 
 static void activate (LV2_Handle instance)
