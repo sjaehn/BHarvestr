@@ -117,7 +117,7 @@ GUI_C_INCL = \
 	src/BWidgets/pugl/x11_cairo.c \
 	src/BWidgets/pugl/x11.c
 
-$(BUNDLE): clean $(DSP_OBJ) $(GUI_OBJ)
+$(BUNDLE): check clean $(DSP_OBJ) $(GUI_OBJ)
 	@cp $(ROOTFILES) $(BUNDLE)
 	@mkdir -p $(BUNDLE)/inc
 	@cp $(INCFILES) $(BUNDLE)/inc
@@ -182,3 +182,5 @@ clean:
 	@rm -rf $(BUNDLE)
 
 .PHONY: all install install-strip uninstall clean
+
+.NOTPARALLEL:
