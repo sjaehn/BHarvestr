@@ -67,7 +67,7 @@
 #define BG_FILE "inc/surface.png"
 #define HELP_URL "https://github.com/sjaehn/BHarvestr/blob/master/README.md"
 #define YT_URL ""
-#define OPEN_CMD "xdg-open"
+#define WWW_BROWSER_CMD "x-www-browser"
 #define MAXUNDO 20
 
 #define RESIZE(widget, x, y, w, h, sz) {widget.moveTo ((x) * (sz), (y) * (sz)); widget.resize ((w) * (sz), (h) * (sz));}

@@ -21,6 +21,7 @@
 #include "BHarvestrGUI.hpp"
 #include <ctime>
 #include "BUtilities/to_string.hpp"
+#include "BUtilities/vsystem.hpp"
 #include "Envelope.hpp"
 
 BHarvestrGUI::BHarvestrGUI (const char *bundle_path, const LV2_Feature *const *features, PuglNativeView parentWindow) :
@@ -2028,12 +2029,20 @@ void BHarvestrGUI::patternClickedCallback (BEvents::Event* event)
 
 void BHarvestrGUI::helpButtonClickedCallback (BEvents::Event* event)
 {
-	if (system(OPEN_CMD " " HELP_URL)) std::cerr << "BHarvestr.lv2#GUI: Can't open " << HELP_URL << ". You can try to call it manually.\n";
+	char cmd[] = WWW_BROWSER_CMD;
+	char param[] = HELP_URL;
+	char* argv[] = {cmd, param, NULL};
+	std::cerr << "BHarvestr.lv2#GUI: Call " << HELP_URL << " for help.\n";
+	if (BUtilities::vsystem (argv) == -1) std::cerr << "BHarvestr.lv2#GUI: Couldn't fork.\n";
 }
 
 void BHarvestrGUI::ytButtonClickedCallback (BEvents::Event* event)
 {
-	if (system(OPEN_CMD " " YT_URL))  std::cerr << "BHarvestr.lv2#GUI: Can't open " << YT_URL << ". You can try to call it manually.\n";
+	char cmd[] = WWW_BROWSER_CMD;
+	char param[] = YT_URL;
+	char* argv[] = {cmd, param, NULL};
+	std::cerr << "BHarvestr.lv2#GUI: Call " << YT_URL << " for tutorial video.\n";
+	if (BUtilities::vsystem (argv) == -1) std::cerr << "BHarvestr.lv2#GUI: Couldn't fork.\n";
 }
 
 void BHarvestrGUI::drawGrainDisplay ()
