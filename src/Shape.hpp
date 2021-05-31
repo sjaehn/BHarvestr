@@ -482,8 +482,8 @@ template<size_t sz> void Shape<sz>::drawLineOnMap (BUtilities::Point p1, BUtilit
 
 	else
 	{
-		uint32_t i = ((uint32_t) (p1.x * MAPRES)) % MAPRES;
-		map_ [i] = p1.y;
+		uint32_t i = ((uint32_t) (p2.x * MAPRES)) % MAPRES;
+		map_ [i] = p2.y;
 	}
 }
 
